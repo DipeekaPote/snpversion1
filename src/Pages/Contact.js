@@ -43,6 +43,7 @@ const ContactTable = () => {
 
     fetchContacts();
   }, []);
+  
   const handleContactUpdated = () => {
     fetchContacts(); // Refetch contacts when updated
   };

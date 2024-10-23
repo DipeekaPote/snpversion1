@@ -296,8 +296,6 @@ const JobTemplateUpdate = () => {
     setComments(tempvalues.comments || []);
   };
 
-
-
   const handleEditorChange = (content) => {
     setJobDescriptionNew(content);
   };

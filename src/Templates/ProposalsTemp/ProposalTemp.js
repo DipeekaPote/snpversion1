@@ -16,7 +16,8 @@ import {
   ListItemText,
   Popover,
   Autocomplete,
-  Alert
+  Alert,
+  InputLabel,
 } from '@mui/material';
 import Editor from '../Texteditor/Editor';
 import TermEditor from '../Texteditor/TermEditor';
@@ -31,8 +32,12 @@ import { MaterialReactTable, useMaterialReactTable } from 'material-react-table'
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { CiMenuKebab } from "react-icons/ci";
+import EditorShortcodes from '../Texteditor/EditorShortcodes';
 
 const MyStepper = () => {
+
+  const PROPOSAL_API = process.env.REACT_APP_PROPOSAL_TEMP_URL
+
   const [activeStep, setActiveStep] = useState(0);
   const [showStepper, setShowStepper] = useState(false);
   const [introductionContent, setIntroductionContent] = useState('');
@@ -40,29 +45,60 @@ const MyStepper = () => {
   const [servicedata, setServiceData] = useState([]);
   const [activeOption, setActiveOption] = useState('');
   const [totalAmount, setTotalAmount] = useState(0);
-
-  const PROPOSAL_API = process.env.REACT_APP_PROPOSAL_TEMP_URL
+  const [showForm, setShowForm] = useState(false);
 
   const navigate = useNavigate();
 
+  const [invoiceData, setInvoiceData] = useState({});
+  const [isUpdating, setIsUpdating] = useState(false);
+  const serviceandinvoiceSettings = (data) => {
+    console.log('Invoice data received:', data);
+
+    const newInvoiceData = {
+      servicesandinvoicetempid: data.invoiceTempId,
+      invoicetemplatename: data.invoiceTempName,
+      invoiceteammember: data.invoiceTeamMember,
+      issueinvoice: data.issueInvoiceSelect,
+      specificdate: data.specificDate,
+      specifictime: data.specificTime,
+      description: data.descriptionData,
+      lineItems: data.lineItems,
+      summary: data.summary,
+      isUpdating: isUpdating,
+      notetoclient: data.noteToClient,
+
+    };
+    setInvoiceData(newInvoiceData);
+
+  };
+  console.log(invoiceData)
+
+  const [addInvoice, setAddInvoice] = useState('');
+  const [addInvoiceitemized, setAddInvoiceitemized] = useState('');
+
   const handleShowInvoiceForm = () => {
     setActiveOption('invoice');
+    setAddInvoice('invoice');
   };
 
   const handleShowServiceForm = () => {
     setActiveOption('service');
+    setAddInvoiceitemized('service')
   };
 
   const [stepsVisibility, setStepsVisibility] = useState({
     Introduction: true,
     Terms: true,
     ServicesInvoices: true,
+    CustomEmailMessage: true,
+    Reminders: true,
   });
 
   const steps = ['General'].concat(
     stepsVisibility.Introduction ? ['Introduction'] : [],
     stepsVisibility.Terms ? ['Terms'] : [],
-    stepsVisibility.ServicesInvoices ? ['Services & Invoices'] : []
+    stepsVisibility.ServicesInvoices ? ['Services & Invoices'] : [],
+    activeOption === 'invoice' ? ['Payments'] : []
   );
 
   const handleNext = () => {
@@ -74,18 +110,20 @@ const MyStepper = () => {
   };
 
   const handleReset = () => {
-    createsavejobtemp();
+    console.log(activeStep)
+    createsaveProposaltemp();
     setActiveStep(0);
     setShowStepper(false); // Hide stepper and show the create template button
   };
 
+ 
   const handleStepClick = (step) => {
+    console.log(activeStep)
     setActiveStep(step);
   };
 
   const handleCreateTemplateClick = () => {
     setShowStepper(true);
-    createsavejobtemp();
   };
 
   const handleSwitchChange = (step) => (event) => {
@@ -110,6 +148,9 @@ const MyStepper = () => {
   const [filteredShortcuts, setFilteredShortcuts] = useState([]);
   const [selectedOption, setSelectedOption] = useState('contacts');
   const [selectedShortcut, setSelectedShortcut] = useState("");
+  const [customMessageInEmail, setCustomMessageInEmail] = useState('');
+  const [daysuntilNextReminder, setDaysuntilNextReminder] = useState('3');
+  const [noOfReminder, setNoOfReminder] = useState(1);
 
   const toggleDropdown = (event) => {
     setAnchorEl(event.currentTarget);
@@ -120,6 +161,12 @@ const MyStepper = () => {
     setProposalName((prevText) => prevText + `[${shortcut}]`);
     setShowDropdown(false);
   };
+
+  const handleAddShortcutforCustomEmail = (shortcut) => {
+    setCustomMessageInEmail((prevText) => prevText + `[${shortcut}]`);
+    setShowDropdown(false);
+  };
+
   useEffect(() => {
     // Simulate filtered shortcuts based on some logic (e.g., search)
     setFilteredShortcuts(shortcuts.filter((shortcut) => shortcut.title.toLowerCase().includes('')));
@@ -216,6 +263,11 @@ const MyStepper = () => {
     setProposalName(value);
   };
 
+  const handleCustomMessageInEmail = (e) => {
+    const { value } = e.target;
+    setCustomMessageInEmail(value);
+  };
+
   const [selectedUser, setSelectedUser] = useState([]);
   const [combinedTeamMemberValues, setCombinedTeamMemberValues] = useState([]);
   const [userData, setUserData] = useState([]);
@@ -223,6 +275,7 @@ const MyStepper = () => {
   // console.log(combinedValues)
   useEffect(() => {
     fetchUserData();
+    setIsUpdating(false)
   }, []);
 
   const fetchUserData = async () => {
@@ -241,6 +294,7 @@ const MyStepper = () => {
     const selectedValues = selectedOptions.map((option) => option.value);
     setCombinedTeamMemberValues(selectedValues);
   };
+
   const options = userData.map((user) => ({
     value: user._id,
     label: user.username,
@@ -248,9 +302,9 @@ const MyStepper = () => {
 
   // services data
   useEffect(() => {
-
     fetchServiceData();
   }, []);
+
   const fetchServiceData = async () => {
     try {
       const url = 'http://127.0.0.1:7500/workflow/services/servicetemplate';
@@ -267,6 +321,7 @@ const MyStepper = () => {
     label: service.serviceName,
   }));
   const [selectedservice, setselectedService] = useState();
+
   const fetchservicebyid = async (id, rowIndex) => {
     const requestOptions = {
       method: "GET",
@@ -279,13 +334,17 @@ const MyStepper = () => {
         console.log(result.serviceTemplate);
 
         const service = Array.isArray(result.serviceTemplate) ? result.serviceTemplate[0] : result.serviceTemplate;
+        console.log(service);
+        const rate = !isNaN(parseFloat(service.rate)) ? parseFloat(service.rate).toFixed(2) : '0.00';
+        const amount = rate;  // Assuming the amount is the same as the rate for now
 
         const updatedRow = {
           productName: service.serviceName || '', // Assuming serviceName corresponds to productName
           description: service.description || '',
-          rate: service.rate ? `$${service.rate.toFixed(2)}` : '$0.00',
+          // rate: service.rate ? `$${service.rate.toFixed(2)}` : '$0.00',
+          rate: `$${rate}`,
           qty: '1', // Default quantity is 1
-          amount: service.rate ? `$${service.rate.toFixed(2)}` : '$0.00', // Assuming amount is calculated as rate
+          amount: `$${amount}`, // Use formatted amount with $
           tax: service.tax || false,
           isDiscount: false // Default value if not present in the service object
         };
@@ -341,13 +400,13 @@ const MyStepper = () => {
     } else {
       newRows[index][name] = newValue;
     }
-
     setRows(newRows);
   };
 
   const [subtotal, setSubtotal] = useState(0);
   const [taxRate, setTaxRate] = useState(0);
   const [taxTotal, setTaxTotal] = useState(0);
+
 
   const handleSubtotalChange = (event) => {
     const value = parseFloat(event.target.value) || 0;
@@ -369,11 +428,8 @@ const MyStepper = () => {
   useEffect(() => {
     const calculateSubtotal = () => {
       let subtotal = 0;
-
       rows.forEach(row => {
-
         subtotal += parseFloat(row.amount.replace('$', '')) || 0;
-
       });
       console.log(subtotal)
       setSubtotal(subtotal);
@@ -382,68 +438,284 @@ const MyStepper = () => {
     calculateSubtotal();
   }, [rows]);
 
+  const [ProposalsTemplates, setProposalsTemplates] = useState([]);
+
+  useEffect(() => {
+    fetchPrprosalsAllData();
+  }, []);
+
+  const fetchPrprosalsAllData = async () => {
+    try {
+      const url = `${PROPOSAL_API}/workflow/proposalesandels/proposalesandels`;
+
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Failed to fetch Proposals templates");
+      }
+      const data = await response.json();
+      setProposalsTemplates(data.proposalesAndElsTemplates);
+      console.log(data);
+    } catch (error) {
+      console.error("Error fetching Proposals  templates:", error);
+    }
+  }
 
   const [templatename, settemplatename] = useState("");
   const [errors, setErrors] = useState({});
+  const [introductionname, setIntroductionName] = useState("");
+  const [termsandconditionname, setTermsandConditionName] = useState("");
+  const handleIntroductionName = (e) => {
+    const { value } = e.target;
+    setIntroductionName(value);
+  };
+  const handleTermsandConditionName = (e) => {
+    const { value } = e.target;
+    setTermsandConditionName(value);
+  };
 
- 
   const validateForm = () => {
     let tempErrors = {};
     let isValid = true;
     if (!templatename) tempErrors.templatename = "Template name is required";
     // if (!jobName) tempErrors.jobName = "Job name is required";
-
     setErrors(tempErrors);
     // return isValid;
     return Object.keys(tempErrors).length === 0;
   };
 
-  const createsavejobtemp = () => {
-
+  const createsaveProposaltemp = () => {
     if (!validateForm()) {
       // toast.error("Please fix the validation errors.");
       return;
     }
 
-    const options = {
+    if (activeOption === 'invoice') {
+      const options = {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            templatename: templatename,
-            teammember: combinedTeamMemberValues,
-            proposalname: proposalName,
-            introduction: stepsVisibility.Introduction,
-            terms: stepsVisibility.Terms,
-            servicesandinvoices: stepsVisibility.ServicesInvoices,
-            introductiontext: introductionContent,
-            termsandconditions: termsContent,
-            servicesandinvoiceid: "66fa83ffe6e0f4ca11c2204d",
-            custommessageinemail: "false",
-            custommessageinemailtext: "fhxdghxgh",
-            reminders: "false",
-            daysuntilnextreminder: 34646,
-            numberofreminder: 567657,
-            active: true
-        })
-    };
+          templatename: templatename,
+          teammember: combinedTeamMemberValues,
+          proposalname: proposalName,
+          introduction: stepsVisibility.Introduction,
+          terms: stepsVisibility.Terms,
+          servicesandinvoices: stepsVisibility.ServicesInvoices,
+          introductiontext: introductionContent,
+          // servicesandinvoiceid: "66fa83ffe6e0f4ca11c2204d",
+          custommessageinemail: stepsVisibility.CustomEmailMessage,
+          custommessageinemailtext: description,
+          reminders: stepsVisibility.Reminders,
+          daysuntilnextreminder: daysuntilNextReminder,
+          numberofreminder: noOfReminder,
+          introductiontextname: introductionname,
+          introductiontext: introductionContent,
+          termsandconditionsname: termsandconditionname,
+          termsandconditions: termsContent,
 
-    fetch('http://127.0.0.1:7500/workflow/proposalesandels/proposalesandels', options)
+          servicesandinvoicetempid: invoiceData.servicesandinvoicetempid,
+          invoicetemplatename: invoiceData.invoicetemplatename,
+          invoiceteammember: invoiceData.invoiceteammember,
+          issueinvoice: invoiceData.issueinvoice,
+          specificdate: invoiceData.specificdate,
+          specifictime: invoiceData.specifictime,
+          description: invoiceData.description,
+          lineItems: invoiceData.lineItems,
+          summary: invoiceData.summary,
+          notetoclient: invoiceData.notetoclient,
+
+          Addinvoiceoraskfordeposit: addInvoice,
+          Additemizedserviceswithoutcreatinginvoices: addInvoiceitemized,
+          paymentterms: paymentterms,
+          paymentduedate: paymentduedate,
+          paymentamount: paymentamount,
+          active: true
+        })
+      }
+      console.log(options.body)
+      fetch('http://127.0.0.1:7500/workflow/proposalesandels/proposalesandels', options)
         .then(response => response.json())
         .then(result => {
-            console.log(result);
+          console.log(result.message);
+          // toast.success("Invoice created successfully");
+          if (result && result.message === "ProposalesAndEls Template created successfully") {
+            fetchPrprosalsAllData();
+            toast.success("ProposalesAndEls Template created successfully");
+          } else {
+            toast.error(result.message || "Failed to create ProposalesAndEls Template");
+          }
         })
         .catch(error => {
-            console.error('Error:', error);
+          console.error('Error:', error);
         });
-};
+    };
+    if (activeOption === 'service') {
+
+      const lineItems = rows.map(item => ({
+        productorService: item.productName, // Assuming productName maps to productorService
+        description: item.description,
+        rate: item.rate.replace('$', ''), // Removing '$' sign from rate
+        quantity: item.qty,
+        amount: item.amount.replace('$', ''), // Removing '$' sign from amount
+        tax: item.tax.toString() // Converting boolean to string
+      }));
+
+      const options = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          templatename: templatename,
+          teammember: combinedTeamMemberValues,
+          proposalname: proposalName,
+          introduction: stepsVisibility.Introduction,
+          terms: stepsVisibility.Terms,
+          servicesandinvoices: stepsVisibility.ServicesInvoices,
+          introductiontext: introductionContent,
+          // servicesandinvoiceid: "66fa83ffe6e0f4ca11c2204d",
+          custommessageinemail: stepsVisibility.CustomEmailMessage,
+          custommessageinemailtext: description,
+          reminders: stepsVisibility.Reminders,
+          daysuntilnextreminder: daysuntilNextReminder,
+          numberofreminder: noOfReminder,
+          introductiontextname: introductionname,
+          introductiontext: introductionContent,
+          termsandconditionsname: termsandconditionname,
+          termsandconditions: termsContent,
+          servicesandinvoicetempid: invoiceData.servicesandinvoicetempid,
+          // invoicetemplatename: invoiceData.invoicetemplatename,
+          // invoiceteammember: invoiceData.invoiceteammember,
+          // issueinvoice: invoiceData.issueinvoice,
+          // specificdate: invoiceData.specificdate,
+          // specifictime: invoiceData.specifictime,
+          // description: invoiceData.description,
+          lineItems: lineItems,
+          summary: {
+            subtotal: subtotal,
+            taxRate: taxRate,
+            taxTotal: taxTotal,
+            total: totalAmount,
+          },
+          // notetoclient: invoiceData.notetoclient,
+          Addinvoiceoraskfordeposit: addInvoice,
+          Additemizedserviceswithoutcreatinginvoices: addInvoiceitemized,
+          // paymentterms: paymentterms,
+          // paymentduedate: paymentduedate,
+          // paymentamount: paymentamount,
+          active: true
+        })
+      }
+      console.log(options.body)
+      fetch('http://127.0.0.1:7500/workflow/proposalesandels/proposalesandels', options)
+        .then(response => response.json())
+        .then(result => {
+          console.log(result.message);
+          // toast.success("Invoice created successfully");
+          if (result && result.message === "ProposalesAndEls Template created successfully") {
+            fetchPrprosalsAllData();
+            toast.success("ProposalesAndEls Template created successfully");
+          } else {
+            toast.error(result.message || "Failed to create ProposalesAndEls Template");
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    };
+    console.log(options.body)
+
+  };
+
+  const handleDuplicate = async (id) => {
+    try {
+      // Find the template you're duplicating
+      const originalData = ProposalsTemplates.find(row => row._id === id);
+      console.log(originalData)
+      if (!originalData) {
+        toast.error('Template not found');
+        return;
+      }
+
+      // Duplicate the template (you can modify it here if needed)
+      const duplicatedTemplate = {
+        ...originalData,
+        _id: generateNewId(), // Generate a new ID for the duplicated template
+        templatename: `${originalData.templatename} copy` // Modify the template name
+      };// Generate a new ID for the duplicated template
+
+      console.log(duplicatedTemplate)
+
+      // Call the API to save the duplicated template
+      const response = await fetch('http://127.0.0.1:7500/workflow/proposalesandels/proposalesandels', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          templatename: duplicatedTemplate.templatename,
+          proposalname: duplicatedTemplate.proposalname,
+          teammember: duplicatedTemplate.teammember,
+          introduction: duplicatedTemplate.introduction,
+          terms: duplicatedTemplate.terms,
+          servicesandinvoices: duplicatedTemplate.servicesandinvoices,
+          introductiontext: duplicatedTemplate.introductiontext,
+          custommessageinemail: duplicatedTemplate.custommessageinemail,
+          custommessageinemailtext: duplicatedTemplate.custommessageinemailtext,
+          reminders: duplicatedTemplate.reminders,
+          daysuntilnextreminder: duplicatedTemplate.daysuntilnextreminder,
+          numberofreminder: duplicatedTemplate.numberofreminder,
+          introductiontextname: duplicatedTemplate.introductiontextname,
+          termsandconditionsname: duplicatedTemplate.termsandconditionsname,
+          termsandconditions: duplicatedTemplate.termsandconditions,
+          // other fields you want to duplicate...
+
+          servicesandinvoicetempid: duplicatedTemplate.servicesandinvoicetempid,
+          invoicetemplatename: duplicatedTemplate.invoicetemplatename,
+          invoiceteammember: duplicatedTemplate.invoiceteammember,
+          issueinvoice: duplicatedTemplate.issueinvoice,
+          specificdate: duplicatedTemplate.specificdate,
+          specifictime: duplicatedTemplate.specifictime,
+          description: duplicatedTemplate.description,
+          lineItems: duplicatedTemplate.lineItems,
+          summary: duplicatedTemplate.summary,
+          notetoclient: duplicatedTemplate.notetoclient,
+          Addinvoiceoraskfordeposit: duplicatedTemplate.Addinvoiceoraskfordeposit,
+          Additemizedserviceswithoutcreatinginvoices: duplicatedTemplate.Additemizedserviceswithoutcreatinginvoices,
+          active: true,
+          paymentamount: duplicatedTemplate.paymentamount,
+          paymentduedate:  duplicatedTemplate.paymentduedate,
+          paymentterms:  duplicatedTemplate.paymentterms
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result && result.message === "ProposalesAndEls Template created successfully") {
+        fetchPrprosalsAllData();  // Fetch the updated data
+        toast.success("Template duplicated successfully");
+      } else {
+        toast.error(result.message || "Failed to duplicate template");
+      }
+
+    } catch (error) {
+      console.error('Error duplicating template:', error);
+      toast.error('An error occurred while duplicating the template');
+    }
+  };
+
+  // Function to generate a new unique ID for the duplicated template
+  const generateNewId = () => {
+    return Math.random().toString(36).substr(2, 9);  // Generates a simple random ID
+  };
+
 
   //delete template
   const handleEdit = (_id) => {
-
-    navigate("workflow/proposalesandels/proposalesandels/" + _id);
+    navigate("ProposalTempUpdate/" + _id);
   };
+
   //delete template
   const handleDelete = (_id) => {
     // Show a confirmation prompt
@@ -474,70 +746,111 @@ const MyStepper = () => {
           toast.error("Failed to delete item");
         });
     }
-
+  };
+  const [description, setDescription] = useState('');
+  const [absoluteDate, setAbsoluteDates] = useState(false);
+  const handleAbsolutesDates = (checked) => {
+    setAbsoluteDates(checked);
   };
 
-const [tempIdget, setTempIdGet] = useState("");
-const [openMenuId, setOpenMenuId] = useState(null);
-const toggleMenu = (_id) => {
-  setOpenMenuId(openMenuId === _id ? null : _id);
-  setTempIdGet(_id);
-};
+  const handleEditorChange = (content) => {
+    setDescription(content);
+  };
 
-const columns = useMemo(() => [
-  {
-    accessorKey: 'templatename',
-    header: 'Name',
-    Cell: ({ row }) => (
-      <Typography
-        sx={{ color: "#2c59fa", cursor: "pointer", fontWeight: 'bold' }}
-        onClick={() => handleEdit(row.original._id)}
-      >
-        {row.original.templatename}
-      </Typography>
-    ),
-  },
-  {
-    accessorKey: 'Setting', header: 'Setting',
-    Cell: ({ row }) => (
-      <IconButton onClick={() => toggleMenu(row.original._id)} style={{ color: "#2c59fa" }}>
-        <CiMenuKebab style={{ fontSize: "25px" }} />
-        {openMenuId === row.original._id && (
-          <Box sx={{ position: 'absolute', zIndex: 1, backgroundColor: '#fff', boxShadow: 1, borderRadius: 1, p: 1, left: '30px', m: 2 }}>
-            <Typography sx={{ fontSize: '12px', fontWeight: 'bold' }} onClick={() => {
-              handleEdit(row.original._id);
+  const [tempIdget, setTempIdGet] = useState("");
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const toggleMenu = (_id) => {
+    setOpenMenuId(openMenuId === _id ? null : _id);
+    setTempIdGet(_id);
+  };
 
-            }} >Edit</Typography>
-            <Typography sx={{ fontSize: '12px', color: 'red', fontWeight: 'bold' }} onClick={() => handleDelete(row.original._id)}>Delete</Typography>
-          </Box>
-        )}
-      </IconButton>
 
-    ),
+  //*****Payments */
 
-  },
+  const [paymentterms, setPaymentTerms] = useState("");
+  const handlePaymentTerms = (e) => {
+    const { value } = e.target;
+    setPaymentTerms(value);
+  };
+  const [paymentduedate, setPaymentDueDate] = useState("");
+  const handlePaymentDueDate = (e) => {
+    const { value } = e.target;
+    setPaymentDueDate(value);
+  };
+  const [paymentamount, setPaymentAmount] = useState("");
+  const handlePaymentAmount = (e) => {
+    const { value } = e.target;
+    setPaymentAmount(value);
+  };
 
-], [openMenuId]);
 
-const table = useMaterialReactTable({
-  columns,
-  data: proposalesAndElsTemplates,
-  enableBottomToolbar: true,
-  enableStickyHeader: true,
-  columnFilterDisplayMode: "custom", // Render own filtering UI
-  enableRowSelection: true, // Enable row selection
-  enablePagination: true,
-  muiTableContainerProps: { sx: { maxHeight: "400px" } },
-  initialState: {
-    columnPinning: { left: ["mrt-row-select", "tagName"], right: ['settings'], },
-  },
-  muiTableBodyCellProps: {
-    sx: (theme) => ({
-      backgroundColor: theme.palette.mode === "dark-theme" ? theme.palette.grey[900] : theme.palette.grey[50],
-    }),
-  },
-});
+  const columns = useMemo(() => [
+    {
+      accessorKey: 'templatename',
+      header: 'Template Name',
+      Cell: ({ row }) => (
+        <Typography
+          sx={{ color: "#2c59fa", cursor: "pointer", fontWeight: 'bold' }}
+          onClick={() => handleEdit(row.original._id)}
+        >
+          {row.original.templatename}
+        </Typography>
+      ),
+    },
+    {
+      accessorKey: 'proposalname',
+      header: 'Proposal Name',
+      Cell: ({ row }) => (
+        <Typography
+          sx={{ color: "#2c59fa", cursor: "pointer", fontWeight: 'bold' }}
+          onClick={() => handleEdit(row.original._id)}
+        >
+          {row.original.proposalname}
+        </Typography>
+      ),
+    },
+    {
+      accessorKey: 'Setting', header: 'Setting',
+      Cell: ({ row }) => (
+        <IconButton onClick={() => toggleMenu(row.original._id)} style={{ color: "#2c59fa" }}>
+          <CiMenuKebab style={{ fontSize: "25px" }} />
+          {openMenuId === row.original._id && (
+            <Box sx={{ position: 'absolute', zIndex: 1, backgroundColor: '#fff', boxShadow: 1, borderRadius: 1, p: 1, left: '30px', m: 2 }}>
+              <Typography sx={{ fontSize: '12px', fontWeight: 'bold' }} onClick={() => {
+                handleEdit(row.original._id);
 
+              }} >Edit</Typography>
+              <Typography sx={{ fontSize: '12px', color: 'red', fontWeight: 'bold' }} onClick={() => handleDelete(row.original._id)}>Delete</Typography>
+              <Typography sx={{ fontSize: '12px', color: 'green', fontWeight: 'bold' }} onClick={() => handleDuplicate(row.original._id)}>
+                Duplicate
+              </Typography>
+            </Box>
+          )}
+        </IconButton>
+      ),
+    },
+  ], [openMenuId]);
+
+
+  // console.log(ProposalsTemplates);
+  const table = useMaterialReactTable({
+    columns,
+    data: ProposalsTemplates,
+    enableBottomToolbar: true,
+    enableStickyHeader: true,
+    columnFilterDisplayMode: "custom", // Render own filtering UI
+    enableRowSelection: true, // Enable row selection
+    enablePagination: true,
+    muiTableContainerProps: { sx: { maxHeight: "400px" } },
+    initialState: {
+      columnPinning: { left: ["mrt-row-select", "tagName"], right: ['settings'], },
+    },
+    muiTableBodyCellProps: {
+      sx: (theme) => ({
+        backgroundColor: theme.palette.mode === "dark-theme" ? theme.palette.grey[900] : theme.palette.grey[50],
+      }),
+    },
+  });
 
   const renderStepContent = (step) => {
     switch (step) {
@@ -558,22 +871,22 @@ const table = useMaterialReactTable({
                 sx={{ backgroundColor: '#fff' }}
               />
               {(!!errors.templatename) && <Alert sx={{
-                    width: '96%',
-                    p: '0', // Adjust padding to control the size
-                    pl: '4%', height: '23px',
-                    borderRadius: '10px',
-                    borderTopLeftRadius: '0',
-                    borderTopRightRadius: '0',
-                    fontSize: '15px',
-                    display: 'flex',
-                    alignItems: 'center', // Center content vertically
-                    '& .MuiAlert-icon': {
-                      fontSize: '16px', // Adjust the size of the icon
-                      mr: '8px', // Add margin to the right of the icon
-                    },
-                  }} variant="filled" severity="error" >
-                    {errors.templatename}
-                  </Alert>}
+                width: '96%',
+                p: '0', // Adjust padding to control the size
+                pl: '4%', height: '23px',
+                borderRadius: '10px',
+                borderTopLeftRadius: '0',
+                borderTopRightRadius: '0',
+                fontSize: '15px',
+                display: 'flex',
+                alignItems: 'center', // Center content vertically
+                '& .MuiAlert-icon': {
+                  fontSize: '16px', // Adjust the size of the icon
+                  mr: '8px', // Add margin to the right of the icon
+                },
+              }} variant="filled" severity="error" >
+                {errors.templatename}
+              </Alert>}
             </Box>
             <Box sx={{ width: '100%', marginTop: '30px' }}>
               <Grid container spacing={2}>
@@ -694,6 +1007,128 @@ const table = useMaterialReactTable({
                 />
                 <p>Specify the services your firm will provide. Add one-time or recurring invoices to get paid automatically.</p>
               </Box>
+
+
+              <Box sx={{ border: '1px solid grey', borderRadius: '20px', padding: '15px', mb: 2, mt: 2 }} className="stepsCard">
+                <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={stepsVisibility.CustomEmailMessage}
+                        onChange={handleSwitchChange('CustomEmailMessage')}
+                      />
+                    }
+                    label="Custom message in email"
+                  />
+                  <Box sx={{ backgroundColor: 'var(--colors-core-blue-600)', padding: '5px 10px', borderRadius: '5px' }}>
+                    <Typography variant="body2" fontWeight="bold" color="white">Best practice</Typography>
+                  </Box>
+                </Box>
+                <Typography variant="body2" color="textSecondary">
+                  Your client will receive a link via email to view and sign this proposal.
+                </Typography>
+
+                {/* Conditionally render the WYSIWYG editor or static content */}
+                {stepsVisibility.CustomEmailMessage && (
+                  <Grid item xs={12} sm={6}>
+                    <Box>
+                      <Popover
+                        open={showDropdown}
+                        anchorEl={anchorEl}
+                        onClose={handleCloseDropdown}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left',
+                        }}
+                        transformOrigin={{
+                          vertical: 'top',
+                          horizontal: 'left',
+                        }}
+                      >
+                        <Box >
+                          <List className="dropdown-list" sx={{ width: '300px', height: '300px', cursor: 'pointer' }}>
+                            {filteredShortcuts.map((shortcut, index) => (
+                              <ListItem
+                                key={index}
+                                onClick={() => handleAddShortcut(shortcut.value)}
+                              >
+                                <ListItemText
+                                  primary={shortcut.title}
+                                  primaryTypographyProps={{
+                                    style: {
+                                      fontWeight: shortcut.isBold ? 'bold' : 'normal',
+                                    },
+                                  }}
+                                />
+                              </ListItem>
+                            ))}
+                          </List>
+                        </Box>
+                      </Popover>
+                    </Box>
+
+                    <Box mt={2}>
+                      <EditorShortcodes onChange={handleEditorChange} content={description} />
+                    </Box>
+                  </Grid>
+                )}
+              </Box>
+
+              <Box mt={2}>
+                <Box display={'flex'} alignItems={'center'} >
+                  <Box>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={stepsVisibility.Reminders}
+                          onChange={handleSwitchChange('Reminders')}
+                        />
+                      }
+                      label="Reminders"
+                    />
+
+                  </Box>
+                  {/* <Typography variant='h6'>Reminders</Typography> */}
+
+                </Box>
+                {stepsVisibility.Reminders && (
+                  <Box mb={3}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mt: 2 }}>
+                      <Box>
+                        {/* <InputLabel sx={{ color: 'black' }}>Days until next reminder</InputLabel> */}
+                        <TextField
+                          // margin="normal"
+                          fullWidth
+                          name="Daysuntilnextreminder"
+                          value={daysuntilNextReminder}
+                          onChange={(e) => setDaysuntilNextReminder(e.target.value)}
+                          placeholder="Days until next reminder"
+                          size="small"
+                          sx={{ mt: 2 }}
+                          label="Days until next reminder"
+                        />
+
+                      </Box>
+
+                      <Box>
+                        {/* <InputLabel sx={{ color: 'black' }}>No Of reminders</InputLabel> */}
+                        <TextField
+
+                          fullWidth
+                          name="No Of reminders"
+                          value={noOfReminder}
+                          onChange={(e) => setNoOfReminder(e.target.value)}
+
+                          placeholder="NoOfreminders"
+                          size="small"
+                          sx={{ mt: 2 }}
+                          label="No Of reminders"
+                        />
+                      </Box>
+                    </Box>
+                  </Box>
+                )}
+              </Box>
             </FormControl>
           </Box>
         );
@@ -709,6 +1144,8 @@ const table = useMaterialReactTable({
                 margin="normal"
                 placeholder="Introduction"
                 sx={{ backgroundColor: '#fff' }}
+                onChange={handleIntroductionName}
+                value={introductionname}
               />
             </Box>
             <Editor
@@ -730,6 +1167,8 @@ const table = useMaterialReactTable({
                 margin="normal"
                 placeholder="Engagement letter"
                 sx={{ backgroundColor: '#fff' }}
+                onChange={handleTermsandConditionName}
+                value={termsandconditionname}
               />
             </Box>
             <TermEditor
@@ -753,6 +1192,7 @@ const table = useMaterialReactTable({
                 marginTop: '15px',
                 backgroundColor: activeOption === 'invoice' ? 'rgba(90, 165, 230, 0.5)' : 'transparent',
                 boxShadow: activeOption === 'invoice' ? '0 0 10px rgba(0, 0, 0, 0.1)' : 'none',
+                fontWeight: 'bold'
               }}
               onClick={handleShowInvoiceForm}
             >
@@ -771,6 +1211,7 @@ const table = useMaterialReactTable({
                 marginTop: '15px',
                 backgroundColor: activeOption === 'service' ? 'rgba(90, 165, 230, 0.5)' : 'transparent',
                 boxShadow: activeOption === 'service' ? '0 0 10px rgba(0, 0, 0, 0.1)' : 'none',
+                fontWeight: 'bold'
               }}
               onClick={handleShowServiceForm}
             >
@@ -781,13 +1222,14 @@ const table = useMaterialReactTable({
             </Typography>
 
             {/* Render the forms conditionally based on activeOption state */}
-            {activeOption === 'invoice' && (
-              <Box>
-
-                {/* <Typography>Invoice Form</Typography> */}
-                <Invoice />
-              </Box>
-            )}
+            <Box mt={3}>
+              {activeOption === 'invoice' && (
+                <Box>
+                  {/* <Typography>Invoice Form</Typography> */}
+                  <Invoice serviceandinvoiceSettings={serviceandinvoiceSettings} />
+                </Box>
+              )}
+            </Box>
 
             {activeOption === 'service' && (
               <Box>
@@ -800,7 +1242,6 @@ const table = useMaterialReactTable({
                       Client-facing itemized list of products and services
                     </Typography>
                   </Box>
-
                   <Table sx={{ width: '100%', backgroundColor: '#fff' }}>
                     <TableHead>
                       <TableRow>
@@ -900,8 +1341,50 @@ const table = useMaterialReactTable({
                     </Table>
                   </div>
                 </div>
+
+
               </Box>
             )}
+          </Box>
+        );
+      case steps.indexOf('Payments'):
+        return (
+          <Box>
+            <Typography variant="h6">Payment Information</Typography>
+            <Box mt={1} mb={3}>
+              <TextField
+                size="small"
+                fullWidth
+                margin="normal"
+                placeholder="Payment terms"
+                sx={{ backgroundColor: '#fff' }}
+                onChange={handlePaymentTerms}
+                value={paymentterms}
+              />
+            </Box>
+            <Box mt={1} mb={3}>
+              <TextField
+                size="small"
+                fullWidth
+                margin="normal"
+                placeholder="Payment due date"
+                sx={{ backgroundColor: '#fff' }}
+                onChange={handlePaymentDueDate}
+                value={paymentduedate}
+              />
+            </Box>
+            <Box mt={1} mb={3}>
+              <TextField
+                size="small"
+                fullWidth
+                margin="normal"
+                placeholder="Payment amount"
+                sx={{ backgroundColor: '#fff' }}
+                onChange={handlePaymentAmount}
+                value={paymentamount}
+              />
+            </Box>
+            {/* Add more fields for payment details if necessary */}
           </Box>
         );
       default:
@@ -953,10 +1436,10 @@ const table = useMaterialReactTable({
         </Box>
       ) : (
         <Box sx={{ mt: 2 }}>
-        <Button variant="contained" onClick={handleCreateTemplateClick}>
-          Create Template
-        </Button>
-        <MaterialReactTable columns={columns} table={table} />
+          <Button variant="contained" onClick={handleCreateTemplateClick}>
+            Create Template
+          </Button>
+          <MaterialReactTable columns={columns} table={table} />
         </Box>
       )}
     </Box>

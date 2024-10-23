@@ -26,7 +26,7 @@ const AccountsDash = () => {
         fetch(url + data, requestOptions)
             .then((response) => response.json())
             .then((result) => {
-                // console.log(result);
+                 console.log(result);
                
                 setAccName(result.accountlist.Name);
 

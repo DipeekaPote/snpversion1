@@ -352,78 +352,152 @@ const Example = () => {
         },
       },
 
-
       {
         accessorKey: 'Tags',
         header: 'Tags',
         filterFn: tagFilterFn, // Use the custom tag filter function
         Filter: ({ column, table }) => <TagFilter column={column} table={table} />,
 
+        // Cell: ({ cell }) => {
+        //   const tags = cell.getValue()[0];
+        //   if (tags.length > 1) {
+        //     const firstTag = tags[0];
+        //     const remainingTagsCount = tags.length - 1;
+        //     return (
+        //       <Tooltip
+        //         placement="top"
+        //         arrow
+        //         title={tags.map(tag => (
+        //           <div key={tag._id}>
+        //             <span style={{
+        //               backgroundColor: tag.tagColour,
+        //               color: "#fff",
+        //               borderRadius: "60px",
+        //               padding: "0.1rem 0.8rem",
+        //               fontSize: "10px",
+        //               display: 'inline-block',
+        //               margin: '2px'
+        //             }}>
+        //               {tag.tagName}
+        //             </span>
+        //           </div>
+        //         ))}
+        //       >
+        //         <Box>
+        //           <span style={{
+        //             backgroundColor: firstTag.tagColour,
+        //             color: "#fff",
+        //             borderRadius: "60px",
+        //             padding: "0.1rem 0.8rem",
+        //             fontSize: "10px",
+        //             display: 'inline-block',
+        //             margin: '2px',
+        //             cursor: 'pointer'
+        //           }}>
+        //             {firstTag.tagName}
+        //           </span>
+        //           {remainingTagsCount > 0 && (
+        //             <Badge
+        //               badgeContent={`+${remainingTagsCount}`}
+        //               color="#7D7C7C"
+        //               overlap="rectangular"
+        //               anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        //               sx={{ ml: 1 }}
+        //             />
+        //           )}
+        //         </Box>
+        //       </Tooltip>
+        //     );
+        //   }
+        //   return (
+        //     <span style={{
+        //       backgroundColor: tags.tagColour,
+        //       color: "#fff",
+        //       borderRadius: "60px",
+        //       padding: "0.1rem 0.8rem",
+        //       fontSize: "10px",
+        //       display: 'inline-block',
+        //       margin: '2px'
+        //     }}>
+        //       {tags.tagName}
+        //     </span>
+        //   );
+        // },
+
         Cell: ({ cell }) => {
-          const tags = cell.getValue()[0];
-          if (tags.length > 1) {
-            const firstTag = tags[0];
-            const remainingTagsCount = tags.length - 1;
-            return (
-              <Tooltip
-                placement="top"
-                arrow
-                title={tags.map(tag => (
-                  <div key={tag._id}>
+          const tags = cell.getValue();
+        
+          // Check if tags is an array and has at least one item
+          if (Array.isArray(tags) && tags.length > 0) {
+            if (tags.length > 1) {
+              const firstTag = tags[0];
+              const remainingTagsCount = tags.length - 1;
+              return (
+                <Tooltip
+                  placement="top"
+                  arrow
+                  title={tags.map(tag => (
+                    <div key={tag._id}>
+                      <span style={{
+                        backgroundColor: tag.tagColour,
+                        color: "#fff",
+                        borderRadius: "60px",
+                        padding: "0.1rem 0.8rem",
+                        fontSize: "10px",
+                        display: 'inline-block',
+                        margin: '2px'
+                      }}>
+                        {tag.tagName}
+                      </span>
+                    </div>
+                  ))}
+                >
+                  <Box>
                     <span style={{
-                      backgroundColor: tag.tagColour,
+                      backgroundColor: firstTag.tagColour,
                       color: "#fff",
                       borderRadius: "60px",
                       padding: "0.1rem 0.8rem",
                       fontSize: "10px",
                       display: 'inline-block',
-                      margin: '2px'
+                      margin: '2px',
+                      cursor: 'pointer'
                     }}>
-                      {tag.tagName}
+                      {firstTag.tagName}
                     </span>
-                  </div>
-                ))}
-              >
-                <Box>
-                  <span style={{
-                    backgroundColor: firstTag.tagColour,
-                    color: "#fff",
-                    borderRadius: "60px",
-                    padding: "0.1rem 0.8rem",
-                    fontSize: "10px",
-                    display: 'inline-block',
-                    margin: '2px',
-                    cursor: 'pointer'
-                  }}>
-                    {firstTag.tagName}
-                  </span>
-                  {remainingTagsCount > 0 && (
-                    <Badge
-                      badgeContent={`+${remainingTagsCount}`}
-                      color="#7D7C7C"
-                      overlap="rectangular"
-                      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                      sx={{ ml: 1 }}
-                    />
-                  )}
-                </Box>
-              </Tooltip>
+                    {remainingTagsCount > 0 && (
+                      <Badge
+                        badgeContent={`+${remainingTagsCount}`}
+                        color="#7D7C7C"
+                        overlap="rectangular"
+                        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                        sx={{ ml: 1 }}
+                      />
+                    )}
+                  </Box>
+                </Tooltip>
+              );
+            }
+            // If there's only one tag, render it directly
+            return (
+              <span style={{
+                backgroundColor: tags[0].tagColour,
+                color: "#fff",
+                borderRadius: "60px",
+                padding: "0.1rem 0.8rem",
+                fontSize: "10px",
+                display: 'inline-block',
+                margin: '2px'
+              }}>
+                {tags[0].tagName}
+              </span>
             );
           }
-          return (
-            <span style={{
-              backgroundColor: tags.tagColour,
-              color: "#fff",
-              borderRadius: "60px",
-              padding: "0.1rem 0.8rem",
-              fontSize: "10px",
-              display: 'inline-block',
-              margin: '2px'
-            }}>
-              {tags.tagName}
-            </span>
-          );
-        },
+        
+          // If tags is not an array or is empty, you may want to return something else
+          return <span>No Tags</span>; // Or handle it however you'd like
+        }
+        
 
       },
       {
@@ -479,7 +553,7 @@ const Example = () => {
     enableBottomToolbar: true,
     enableStickyHeader: true,
     columnFilterDisplayMode: "custom", //we will render our own filtering UI
-    enableRowSelection: true, // Enable row selection
+    // enableRowSelection: true, // Enable row selection
     enablePagination: true,
     muiTableContainerProps: { sx: { maxHeight: "400px" } },
     initialState: {

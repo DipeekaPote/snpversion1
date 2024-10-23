@@ -583,10 +583,8 @@ checked: checkedSubtasks.includes(id), // Check if ID is in the checkedSubtasks 
           <Button variant="contained" color="primary" onClick={handleCreateChat} sx={{ mb: 3 }}>
             Create Chat Template
           </Button>
-
           <MaterialReactTable
             columns={columns}
-
             table={table}
           />
         </Box>
@@ -600,7 +598,6 @@ checked: checkedSubtasks.includes(id), // Check if ID is in the checkedSubtasks 
                 <Grid container spacing={2} ml={1} mt={2}>
                   <Grid item xs={12} sm={5}>
                     <Box>
-
                       <Box>
                         <InputLabel sx={{ color: 'black' }}> Name</InputLabel>
                         <TextField
@@ -632,15 +629,9 @@ checked: checkedSubtasks.includes(id), // Check if ID is in the checkedSubtasks 
                           {templateNameError}
                         </Alert>}
                       </Box>
-
                       <Box mt={2}>
-
-
                         <InputLabel sx={{ color: 'black' }}>From</InputLabel>
-
-
                         <Autocomplete
-
                           options={options}
                           sx={{ mt: 2, mb: 2 }}
                           size='small'
@@ -676,15 +667,11 @@ checked: checkedSubtasks.includes(id), // Check if ID is in the checkedSubtasks 
                             </>
                           )}
                           isClearable={true}
-
                         />
-
                       </Box>
-
                       <Box>
 
                         <InputLabel sx={{ color: 'black' }}>Subject</InputLabel>
-
                         <TextField
                           sx={{ mt: 2 }}
                           fullWidth
@@ -784,7 +771,6 @@ checked: checkedSubtasks.includes(id), // Check if ID is in the checkedSubtasks 
                         {absoluteDate && (
                           <Box mb={3}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mt: 2 }}>
-
                               <Box>
                                 <InputLabel sx={{ color: 'black' }}>Days until next reminder</InputLabel>
                                 <TextField
@@ -813,7 +799,6 @@ checked: checkedSubtasks.includes(id), // Check if ID is in the checkedSubtasks 
                                   sx={{ mt: 2 }}
                                 />
                               </Box>
-
                             </Box>
                           </Box>
                         )}

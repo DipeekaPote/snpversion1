@@ -20,10 +20,10 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { IoClose } from "react-icons/io5";
+
 const OrganizersTempUpdate = () => {
 
   const ORGANIZER_TEMP_API = process.env.REACT_APP_ORGANIZER_TEMP_URL;
-
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -79,6 +79,7 @@ const OrganizersTempUpdate = () => {
   };
   const [daysuntilNextReminder, setDaysuntilNextReminder] = useState('3');
   const [noOfReminder, setNoOfReminder] = useState(1);
+  
   useEffect(() => {
     fetchidwiseData();
   }, []);

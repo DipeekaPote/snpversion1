@@ -51,6 +51,8 @@ const ContactForm = ({ handleNewDrawerClose, handleDrawerClose }) => {
     const [state, setState] = useState('');
     const [postalCode, setPostalCode] = useState('');
     const [combinedValues, setCombinedValues] = useState([]);
+
+    console.log(selectedCountry);
     useEffect(() => {
         axios
             .get('https://restcountries.com/v3.1/all')
@@ -116,20 +118,18 @@ const ContactForm = ({ handleNewDrawerClose, handleDrawerClose }) => {
             notify: false,
             emailSync: false,
             tags: combinedValues,
-            country: country,
+            country: {
+                name: "South Georgia",
+                code: "GS"
+              },
             streetAddress: streetAddress,
             city: city,
             state: state,
             postalCode: postalCode,
             phoneNumbers: phoneNumbers.map((phone) => phone.phone),
 
-
-
-
-
-
         }])
-
+console.log(raw)
         const requestOptions = {
             method: "POST",
 

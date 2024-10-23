@@ -35,6 +35,7 @@ import Jobs from './Pages/Jobs.js';
 import PipelineTempUpdate from './Templates/PipelineTemp/PipelineTempUpdate.js';
 import TasksUpdate from './Templates/Task/TasksUpdate.js'
 import EmailTempUpdate from './Templates/EmailTemp/EmailTempUpdate.js'
+import ProposalTempUpdate from './Templates/ProposalsTemp/PrposalTempUpdate.js';
 
 import Overview from "./nested-navbar/NewPages/Overview.js";
 import Notes from "./nested-navbar/NewPages/Notes.js";
@@ -63,7 +64,9 @@ import IRS from "./nested-navbar/documents-nav/IRS";
 import InvoiceTempUpdate from './Templates/InvoicesTemp/InvoiceTempUpdate.js';
 import ChatTempUpdate from './Templates/ChatsTemp/ChatTempUpdate.js';
 import ServicesUpdate from './Pages/ServiceUpdate.js';
-import PreviewOrganizer from './Templates/OrganizersTemp/PreviewOranizer.js'
+import PreviewOrganizer from './Templates/OrganizersTemp/PreviewOranizer.js';
+
+
 
 const App = () => {
   return (
@@ -106,6 +109,7 @@ const App = () => {
             <Route path='recurring-invoices' element={<RecurringInvoiceTemp />} />
             <Route path='signatures' element={<SignatureTemp />} />
             <Route path='proposals' element={<ProposalTemp />} />
+            <Route path='proposals/ProposalTempUpdate/:_id' element={<ProposalTempUpdate />} />
           </Route>
           <Route path='/firmtemp/teammember' element={<TeamMember/>}/>
           {/* <Route path='/firmtemp/services' element={<Services/>}/> */}

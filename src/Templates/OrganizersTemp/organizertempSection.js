@@ -68,9 +68,6 @@ const Section = ({ sections, section, onDelete, onUpdate, onDuplicate, onSaveFor
     if (onSaveSectionData) {
       onSaveSectionData(sectionSettings);
     }
-
-    
-
     setDrawerOpen(false)
   };
   // const [previousSectionSettings, setPreviousSectionSettings] = useState({});
@@ -871,13 +868,14 @@ const Section = ({ sections, section, onDelete, onUpdate, onDuplicate, onSaveFor
     >
       <IoSettingsOutline />
     </IconButton> */}
+
+
            <IconButton onClick={handleSectionSettingsClick}>
             <IoSettingsOutline />
           </IconButton>
           <IconButton onClick={handleDelete}>
             <RiDeleteBinLine />
           </IconButton>
-
         </Box>
         <Menu
           anchorEl={anchorEl}
@@ -890,10 +888,7 @@ const Section = ({ sections, section, onDelete, onUpdate, onDuplicate, onSaveFor
             </MenuItem>
           ))}
         </Menu>
-
-
       </Box>
-
 
       {formElements.map(element => (
         <Box key={element.id} sx={{ marginTop: '16px' }}>
@@ -924,10 +919,7 @@ const Section = ({ sections, section, onDelete, onUpdate, onDuplicate, onSaveFor
               <Typography gutterBottom>
                 {text}
               </Typography>
-
-
             </Box>
-
             <IconButton onClick={() => toggleDrawer(false)}>
               <IoMdClose />
             </IconButton>
@@ -945,7 +937,6 @@ const Section = ({ sections, section, onDelete, onUpdate, onDuplicate, onSaveFor
                       color="primary"
                     />
                   }
-
                 />
               </Box>
               <Typography variant='h6'>Allow client to repeat</Typography>
@@ -968,8 +959,6 @@ const Section = ({ sections, section, onDelete, onUpdate, onDuplicate, onSaveFor
 
               </Box>
             )}
-
-
             <Box display={'flex'} alignItems={'center'} >
               <Box>
                 <FormControlLabel
@@ -981,11 +970,9 @@ const Section = ({ sections, section, onDelete, onUpdate, onDuplicate, onSaveFor
                       color="primary"
                     />
                   }
-
                 />
               </Box>
               <Typography variant='h6'>Conditional</Typography>
-
             </Box>
             {conditionButton && (
               <Box mb={3} mt={2}>
@@ -1011,7 +998,6 @@ const Section = ({ sections, section, onDelete, onUpdate, onDuplicate, onSaveFor
                     )}
                   />
                 </Box>
-
                 {sectionQuestionAnswers.map((qa, index) => (
                   <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 3, mt: 2 }}>
                     <Box sx={{ width: '380px', }}>
@@ -1072,17 +1058,13 @@ const Section = ({ sections, section, onDelete, onUpdate, onDuplicate, onSaveFor
               </Box>
             )}
 
-
             <Box sx={{ display: 'flex', alighItems: 'center', gap: 3, mt: 2 }}>
               <Button variant="contained" onClick={handleSectionSave}>Save</Button>
               <Button variant="outlined" onClick={() => toggleDrawer(false)}>Cancel</Button>
             </Box>
           </Box>
-
         </Box>
       </Drawer>
-
-
       <Drawer
         anchor="right"
         open={queDrawerOpen}
@@ -1107,7 +1089,6 @@ const Section = ({ sections, section, onDelete, onUpdate, onDuplicate, onSaveFor
           <Box sx={{ p: 3, }}>
             <Paper style={{ padding: '15px' }}>
               <Box display={'flex'} alignItems={'center'} m={1} >
-
                 <FormControlLabel
                   control={
                     <Switch
@@ -1117,19 +1098,14 @@ const Section = ({ sections, section, onDelete, onUpdate, onDuplicate, onSaveFor
                       color="primary"
                     />
                   }
-
                 />
-
                 <Typography variant='h6'>Required</Typography>
-
               </Box>
               <Divider />
               <p>It is mandatory to respond to this question to submit the organizer</p>
             </Paper>
-
             <Paper style={{ padding: '15px', marginTop: '20px' }}>
               <Box display={'flex'} alignItems={'center'} m={1} >
-
                 <FormControlLabel
                   control={
                     <Switch
@@ -1139,16 +1115,12 @@ const Section = ({ sections, section, onDelete, onUpdate, onDuplicate, onSaveFor
                       color="primary"
                     />
                   }
-
                 />
-
                 <Typography variant='h6'>Pre-Filled</Typography>
-
               </Box>
               <Divider />
               <p>If asked before, answer pre-populates from previous organizer</p>
             </Paper>
-
             <Paper style={{ padding: '15px', marginTop: '20px' }}>
               <Box display={'flex'} alignItems={'center'} m={1} >
                 <Box>
@@ -1161,11 +1133,9 @@ const Section = ({ sections, section, onDelete, onUpdate, onDuplicate, onSaveFor
                         color="primary"
                       />
                     }
-
                   />
                 </Box>
                 <Typography variant='h6'>Conditional</Typography>
-
               </Box>
               <Divider />
               <p>Ask question only in certain scenarios</p>
@@ -1269,7 +1239,6 @@ const Section = ({ sections, section, onDelete, onUpdate, onDuplicate, onSaveFor
                         color="primary"
                       />
                     }
-
                   />
                 </Box>
                 <Typography variant='h6'>Description</Typography>
@@ -1290,8 +1259,6 @@ const Section = ({ sections, section, onDelete, onUpdate, onDuplicate, onSaveFor
                     value={descriptionText}
                     onChange={(event) => setDescriptionText(event.target.value)}
                   />
-
-
                 </Box>
               )}
 
@@ -1301,11 +1268,8 @@ const Section = ({ sections, section, onDelete, onUpdate, onDuplicate, onSaveFor
               <Button variant="outlined" onClick={() => setQueDrawerOpen(false)}>Cancel</Button>
             </Box>
           </Box>
-
         </Box>
       </Drawer>
-
-
     </Box>
   );
 };

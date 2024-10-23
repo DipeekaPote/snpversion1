@@ -789,6 +789,7 @@ const JobTemp = () => {
                 <Box mt={2}>
                   <EditorShortcodes onChange={handleEditorChange} content={description} />
                 </Box>
+                
                 <Box mt={2}>
                   <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
                     <Typography variant='h6' className='jobtemp-input-label'>Start and Due Date</Typography>

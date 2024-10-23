@@ -761,7 +761,6 @@ const Invoices = ({ charLimit = 4000 }) => {
                                         renderInput={(params) => (
                                             <TextField
                                                 {...params}
-
                                                 placeholder="Team Member"
                                             />
                                         )}
