@@ -11,7 +11,7 @@ import {
     useMediaQuery,
     Chip,
     MenuItem,
-    Select,ListItem,
+    Select, ListItem,
     TextField,
     InputLabel,
     Autocomplete
@@ -121,7 +121,7 @@ const ContactForm = ({ handleNewDrawerClose, handleDrawerClose }) => {
             country: {
                 name: "South Georgia",
                 code: "GS"
-              },
+            },
             streetAddress: streetAddress,
             city: city,
             state: state,
@@ -129,7 +129,7 @@ const ContactForm = ({ handleNewDrawerClose, handleDrawerClose }) => {
             phoneNumbers: phoneNumbers.map((phone) => phone.phone),
 
         }])
-console.log(raw)
+        console.log(raw)
         const requestOptions = {
             method: "POST",
 
@@ -517,41 +517,39 @@ console.log(raw)
                             </MenuItem>
                         ))}
                     </Select> */}
-                     <Autocomplete
-                          size="small"
-                          options={countries}
-                          getOptionLabel={(option) => option.name}
-                          value={selectedCountry}
-                          onChange={(event, newValue) => setSelectedCountry(newValue)}
-                          renderOption={(props, option) => (
+                    <Autocomplete
+                        size="small"
+                        options={countries}
+                        getOptionLabel={(option) => option.name}
+                        value={selectedCountry}
+                        onChange={(event, newValue) => setSelectedCountry(newValue)}
+                        renderOption={(props, option) => (
                             <ListItem
-                              {...props}
-                              sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                padding: '8px',
-                                borderBottom: '1px solid #ddd',
-                                cursor: 'pointer'
-                              }}
+                                {...props}
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    padding: '8px',
+                                    borderBottom: '1px solid #ddd',
+                                    cursor: 'pointer'
+                                }}
                             >
-                              <Typography sx={{ fontWeight: 500 }}>{option.name}</Typography>
-                              <Typography sx={{ fontSize: '0.9rem', color: 'gray' }}>{option.code}</Typography>
+                                <Typography sx={{ fontWeight: 500 }}>{option.name}</Typography>
+                                <Typography sx={{ fontSize: '0.9rem', color: 'gray' }}>{option.code}</Typography>
                             </ListItem>
-                          )}
-                          renderInput={(params) => (
+                        )}
+                        renderInput={(params) => (
                             <TextField
-                              {...params}
-                              placeholder="Country"
-                              variant="outlined"
-                              sx={{ marginTop: '8px', width: '100%' }}
+                                {...params}
+                                placeholder="Country"
+                                variant="outlined"
+                                sx={{ marginTop: '8px', width: '100%' }}
                             />
-                          )}
-                        />
+                        )}
+                    />
                 </Box>
                 <Box>
-
                     <InputLabel sx={{ color: 'black', mt: 2 }}>Street address</InputLabel>
-
                     <TextField
                         fullWidth
                         name="streetAddress"
@@ -575,9 +573,7 @@ console.log(raw)
                     }}
                 >
                     <Box>
-
                         <InputLabel sx={{ color: 'black' }}>City</InputLabel>
-
                         <TextField
                             fullWidth
                             margin="normal"

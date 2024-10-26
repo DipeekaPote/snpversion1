@@ -4,13 +4,17 @@ import { BiArchiveOut } from "react-icons/bi";
 import { LuUserCircle2 } from "react-icons/lu";
 import { MdEdit } from "react-icons/md";
 import { useParams } from "react-router-dom";
-import { Drawer, useMediaQuery, Menu, MenuItem, TextField, } from '@mui/material';
+import {
+  Drawer, useMediaQuery, Menu, MenuItem, TextField, Select, Checkbox,
+  ListItemText,
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ContactUpdateForm from './contactupdate';
 import axios from 'axios';
 import { useTheme } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Accountupdate from './accountupdate';
+import ChevronDownIcon from '@mui/icons-material/ExpandMore';
 
 const Info = () => {
   const theme = useTheme();
@@ -25,8 +29,14 @@ const Info = () => {
   const [teams, setTeams] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [accountDatabyid, setAccountDatabyid] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [open, setOpen] = useState(false);
+  const handleMenuOpen = () => {
+    setOpen(true);
+  };
 
   useEffect(() => {
+    fetchContacts();
     const requestOptions = {
       method: "GET",
       redirect: "follow",
@@ -48,16 +58,19 @@ const Info = () => {
       .catch((error) => console.error(error));
   }, [ACCOUNT_API, data]);
 
-  const fetchaccountdatabyid = (accountid) =>{
+  console.log(contacts)
+  console.log(accountDatabyid)
+
+  const fetchaccountdatabyid = (accountid) => {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
-    
+
     const requestOptions = {
       method: "GET",
       headers: myHeaders,
       redirect: "follow"
     };
-    
+
     fetch(`http://127.0.0.1:7000/accounts/accountdetails/getAccountbyIdAll/${accountid}`, requestOptions)
       .then((response) => response.json())
       .then((result) => {
@@ -99,6 +112,7 @@ const Info = () => {
       console.error('API Error:', error);
     }
   };
+  console.log(contactData)
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [contactName, setContactName] = useState(null);
@@ -111,7 +125,7 @@ const Info = () => {
     setSelectedContact(id); // Set the selected contact ID here
     setContactName(contactName);
   };
-  console.log(contactName)
+
   const handleMenuClose = () => {
     setAnchorEl(null);
     setSelectedContact(null); // Reset selected contact when menu closes
@@ -196,12 +210,67 @@ const Info = () => {
     handleMenuClose();
   };
 
-
   //edit right side form
   const [isNewDrawerOpen, setIsNewDrawerOpen] = useState(false);
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [descriptionModalOpen, setDescriptionModalOpen] = useState(false);
   const [description, setDescription] = useState('');
+  //********************Add Contacts */
+  const [selectedContacts, setSelectedContacts] = useState([]);
+  const [isDrawerOpenForAddContact, setIsDrawerOpenForAddContact] = useState(false);
+  const [filteredContacts, setFilteredContacts] = useState(contacts);
+
+  // Effect to filter contacts based on search term
+  const getSelectedIds = () => {
+    return selectedContacts.join(', '); // Just join the IDs array into a string
+  };
+
+  useEffect(() => {
+    setFilteredContacts(
+      contactData.filter(contact =>
+        contact.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    );
+  }, [searchQuery, contactData]); // Adjusted dependency array
+
+  const handleAddContactDrawer = () => {
+    setIsDrawerOpenForAddContact(true);
+  };
+
+  const handleCloseDrawerofAddContact = () => {
+    setIsDrawerOpenForAddContact(false);
+  };
+
+  const handleLinkAccounts = () => {
+    updateContactstoAccount(selectedContacts);
+  }
+  console.log(selectedContacts)
+
+  const updateContactstoAccount = (selectedContacts) => {
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    const existingContactIds = accountDatabyid.contacts.map(contact => contact._id);
+    // Combine existing contact IDs with the new ones
+    const combinedContacts = [...existingContactIds, ...selectedContacts];
+    console.log(combinedContacts)
+    const raw = JSON.stringify({
+      contacts: combinedContacts
+    });
+    console.log(raw)
+    const requestOptions = {
+      method: "PATCH",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow"
+    };
+    fetch(`http://127.0.0.1:7000/accounts/accountdetails/${accountDatabyid._id}`, requestOptions)
+      .then((response) => response.text())
+      .then((result) => {
+        console.log(result)
+      })
+      .catch((error) => console.error(error));
+  }
+
 
   return (
     <Box sx={{ width: '100%', padding: 2, mt: 4 }}>
@@ -214,7 +283,7 @@ const Info = () => {
                 <Box>
                   <IconButton><BiArchiveOut /></IconButton>
                   <IconButton onClick={() => setIsNewDrawerOpen(true)}>
-                    <MdEdit /></IconButton>
+                    <MdEdit />_ Edit</IconButton>
                 </Box>
                 <Drawer
                   anchor="right"
@@ -297,12 +366,113 @@ const Info = () => {
             </CardContent>
           </Card>
         </Grid>
+
         <Grid item xs={12} sm={6}>
           <Card sx={{ boxShadow: 3, borderRadius: 2 }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Typography variant='h5' fontWeight='bold'>Contacts</Typography>
+                <Typography variant="h5" fontWeight="bold">Contacts</Typography>
+
+                {/* Button aligned to the right side */}
+                <Button
+                  color="primary"
+                  sx={{ ml: 'auto' }}
+                  onClick={handleAddContactDrawer} // Handle add contact logic
+                >
+                  Add Contact
+                </Button>
               </Box>
+
+              <Drawer
+                anchor="right"
+                open={isDrawerOpenForAddContact}
+                onClose={handleCloseDrawerofAddContact}
+                PaperProps={{
+                  sx: { width: 700 },
+                }}
+              >
+                {/* Header */}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    p: 2,
+                    borderBottom: '1px solid #e0e0e0',
+                  }}
+                >
+                  <Typography variant="h6" fontWeight="bold">
+                    Link Contacts
+                  </Typography>
+                  <IconButton onClick={handleCloseDrawerofAddContact} sx={{ color: '#1876d3' }}>
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+
+                {/* Content Section */}
+                <Box
+                  sx={{
+                    p: 2,
+                    flex: '1 1 auto',
+                    overflowY: 'auto',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2,
+                  }}
+                >
+                  <Autocomplete
+                    multiple // Enable multiple selections
+                    options={filteredContacts}
+                    getOptionLabel={(option) => option.name} // Specify how to display the option
+                    onInputChange={(event, newValue) => {
+                      setSearchQuery(newValue);
+                    }}
+                    onChange={(event, newValue) => {
+                      // Update selected contacts with only IDs
+                      const ids = newValue.map(contact => contact.id); // Extract IDs from selected contacts
+                      setSelectedContacts(ids); // Update selectedContacts with IDs
+                      console.log(getSelectedIds()); // Log the comma-separated IDs
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="outlined"
+                        placeholder="Search contacts..."
+                        onFocus={(e) => e.stopPropagation()} // Prevent dropdown from closing
+                      />
+                    )}
+                    renderOption={(props, option) => (
+                      <li {...props} key={option.id}>
+                        {option.name}
+                      </li>
+                    )}
+                    fullWidth
+                    disableClearable // Prevents clearing the input by clicking the clear button
+                    value={filteredContacts.filter(contact => selectedContacts.includes(contact.id))} // Control the selected value
+                  />
+
+                </Box>
+
+                {/* Footer */}
+                <Box
+                  sx={{
+                    borderTop: '1px solid #e0e0e0',
+                    p: 2,
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    gap: 2,
+                  }}
+                >
+                  <Button variant="contained" color="primary" onClick={handleLinkAccounts}>
+                    Link
+                  </Button>
+                  <Button variant="outlined" color="secondary" onClick={handleCloseDrawerofAddContact}>
+                    Cancel
+                  </Button>
+                </Box>
+              </Drawer>
+
+
               <Box sx={{ mt: 1 }}>
                 <Divider />
               </Box>

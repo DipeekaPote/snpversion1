@@ -295,7 +295,6 @@ const OrganizersTemp = () => {
   };
   const handleEdit = (_id) => {
     navigate('OrganizerTempUpdate/' + _id)
-
   };
   //delete template
   const handleDelete = (_id) => {

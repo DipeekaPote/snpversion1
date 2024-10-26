@@ -65,6 +65,7 @@ import InvoiceTempUpdate from './Templates/InvoicesTemp/InvoiceTempUpdate.js';
 import ChatTempUpdate from './Templates/ChatsTemp/ChatTempUpdate.js';
 import ServicesUpdate from './Pages/ServiceUpdate.js';
 import PreviewOrganizer from './Templates/OrganizersTemp/PreviewOranizer.js';
+import AccountOrganizer from './nested-navbar/NewPages/AccountOrganizer.js';
 
 
 
@@ -77,46 +78,46 @@ const App = () => {
 
         <Route path='/' element={<SidebarComponent />}>
           <Route index element={<Insights />} />
-          <Route path='/docs' element={<Docs/>}/>
+          <Route path='/docs' element={<Docs />} />
           <Route path='clients/accounts' element={<Account />} />
           <Route path='clients/contacts' element={<Contact />} />
-         
+
           <Route path='addJobs' element={<CreateJob />} />
-          <Route path='billing/Invoices' element={<Invoices/>}/>
-          <Route path='workflow/tasks' element={<WorkflowTask/>}/>
-          <Route path='workflow/jobs' element={<Jobs/>}/>
-          <Route path='workflow/pipelines' element={<Pipeline/>}/>
-          <Route path='/organizerpreview' element={<PreviewOrganizer/>}/>
+          <Route path='billing/Invoices' element={<Invoices />} />
+          <Route path='workflow/tasks' element={<WorkflowTask />} />
+          <Route path='workflow/jobs' element={<Jobs />} />
+          <Route path='workflow/pipelines' element={<Pipeline />} />
+          <Route path='/organizerpreview' element={<PreviewOrganizer />} />
           <Route path='firmtemp/templates' element={<Templates />}>
             <Route path="tasks" element={<Tasks />} />
             <Route path="tasks" element={<Tasks />} />
-            <Route path='tasks/taskTempUpdate/:_id' element={<TasksUpdate/>} />
+            <Route path='tasks/taskTempUpdate/:_id' element={<TasksUpdate />} />
             <Route path='tags' element={<Tags />} />
             <Route path='emails' element={<EmailTemp />} />
-            <Route path='emails/emailTempUpdate/:_id' element={<EmailTempUpdate/>}/>
+            <Route path='emails/emailTempUpdate/:_id' element={<EmailTempUpdate />} />
             <Route path='jobs' element={<JobTemp />} />
             <Route path="jobs/JobTemplateUpdate/:_id" element={<JobTemplateUpdate />} />
             <Route path='pipelines' element={<PipelineTemp />} />
-            <Route path='pipelines/PipelineTemplateUpdate/:id' element={<PipelineTempUpdate/>}/>
+            <Route path='pipelines/PipelineTemplateUpdate/:id' element={<PipelineTempUpdate />} />
             <Route path='folders' element={<FolderTemp />} />
             <Route path='chats' element={<ChatTemp />} />
-            <Route path='chats/chatTemplateUpdate/:id' element={<ChatTempUpdate/>}/>
-           
+            <Route path='chats/chatTemplateUpdate/:id' element={<ChatTempUpdate />} />
+
             <Route path='invoices' element={<InvoiceTemp />} />
             <Route path='invoices/invoiceTempUpdate/:id' element={<InvoiceTempUpdate />} />
             <Route path='organizers' element={<OrganizerTemp />} />
-            <Route path='organizers/OrganizerTempUpdate/:id' element={<OrganizersTempUpdate/>}/>
+            <Route path='organizers/OrganizerTempUpdate/:id' element={<OrganizersTempUpdate />} />
             <Route path='recurring-invoices' element={<RecurringInvoiceTemp />} />
             <Route path='signatures' element={<SignatureTemp />} />
             <Route path='proposals' element={<ProposalTemp />} />
             <Route path='proposals/ProposalTempUpdate/:_id' element={<ProposalTempUpdate />} />
           </Route>
-          <Route path='/firmtemp/teammember' element={<TeamMember/>}/>
+          <Route path='/firmtemp/teammember' element={<TeamMember />} />
           {/* <Route path='/firmtemp/services' element={<Services/>}/> */}
-          <Route path='/firmtemp/service'  element={<Services/>}/>
+          <Route path='/firmtemp/service' element={<Services />} />
           {/* <Route path='/firmtemp/services/ServicesUpdate/:id' element={ServicesUpdate}/> */}
-          <Route path='/servicesUpdate/:id' element={<ServicesUpdate/>}/>
-          <Route path='/settings/myaccount' element={<MyAccount/>}/>
+          <Route path='/servicesUpdate/:id' element={<ServicesUpdate />} />
+          <Route path='/settings/myaccount' element={<MyAccount />} />
 
           <Route path="/accountsdash" element={<AccountDash />}>
             <Route path="overview/:data" element={<Overview />} />
@@ -130,8 +131,11 @@ const App = () => {
               <Route path="irs" element={<IRS />} />
             </Route>
             <Route path="communication/:data" element={<Communication />} />
-            <Route path="organizers/:data" element={<Organizers />} />
-            <Route path="invoices/:data" element={<AccountInvoice/>}>
+            <Route path="organizers/:data" element={<Organizers />} >
+             
+            </Route>
+            <Route path="organizers/:data/accountorganizer" element={<AccountOrganizer />} />
+            <Route path="invoices/:data" element={<AccountInvoice />}>
               <Route path="invoice" element={<Invoice />} />
               <Route path="payments" element={<Payments />} />
             </Route>
@@ -149,10 +153,10 @@ const App = () => {
             </Route>
           </Route>
           <Route path='*' element={<ErrorPage />} />
-          
+
         </Route>
-      
-        
+
+
       </Routes>
     </BrowserRouter>
   );

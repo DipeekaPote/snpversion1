@@ -169,7 +169,6 @@ const Example = () => {
           url: `${ACCOUNT_API}/accounts/account/accountdetailslist/`,
           headers: {},
         };
-
         const response = await axios.request(config);
         setAccountData(response.data.accountlist);
 
@@ -553,7 +552,7 @@ const Example = () => {
     enableBottomToolbar: true,
     enableStickyHeader: true,
     columnFilterDisplayMode: "custom", //we will render our own filtering UI
-    // enableRowSelection: true, // Enable row selection
+    enableRowSelection: true, // Enable row selection
     enablePagination: true,
     muiTableContainerProps: { sx: { maxHeight: "400px" } },
     initialState: {

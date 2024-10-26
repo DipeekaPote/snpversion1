@@ -305,37 +305,7 @@ const Invoice = ({ charLimit = 4000, serviceandinvoiceSettings, serviceandinvoic
         tax: item.tax.toString() // Converting boolean to string
     }));
 
-    // const handleSaveInvoice = () => {
-    //     const serviceAndInvoice = {
-    //         invoiceTempId: selectInvoiceTemp.value,
-    //         invoiceTempName: selectInvoiceTemp.label,
-    //         invoiceTeamMember: selecteduser.value,
-    //         issueInvoiceSelect: issueInvoice,
-    //         specificDate: startDate,
-    //         specificTime: selectedTime,
-    //         descriptionData: description,
-    //         lineItems: lineItems,
-    //         summary: {
-    //             subtotal: subtotal,
-    //             taxRate: taxRate,
-    //             taxTotal: taxTotal,
-    //             total: totalAmount,
-    //         },
-    //         noteToClient: clientNote,
-    //     };
-
-    //     console.log('Service and Invoice Settings:', serviceAndInvoice);
-
-    //     if (typeof serviceandinvoiceSettings === 'function') {
-    //         serviceandinvoiceSettings(serviceAndInvoice);
-    //     }
-    // };
-
     const handleSaveInvoice = () => {
-        // Create an array to hold multiple invoices
-        const invoicesArray = [];
-    
-        // Construct the serviceAndInvoice object
         const serviceAndInvoice = {
             invoiceTempId: selectInvoiceTemp.value,
             invoiceTempName: selectInvoiceTemp.label,
@@ -353,17 +323,47 @@ const Invoice = ({ charLimit = 4000, serviceandinvoiceSettings, serviceandinvoic
             },
             noteToClient: clientNote,
         };
-    
-        // Push the serviceAndInvoice object into the invoicesArray
-        invoicesArray.push(serviceAndInvoice);
-    
-        console.log('Invoices Array:', invoicesArray);
-    
-        // If there's a function to handle the invoices array, pass the array to it
+
+        console.log('Service and Invoice Settings:', serviceAndInvoice);
+
         if (typeof serviceandinvoiceSettings === 'function') {
-            serviceandinvoiceSettings(invoicesArray); // Send the array to the callback
+            serviceandinvoiceSettings(serviceAndInvoice);
         }
     };
+
+    // const handleSaveInvoice = () => {
+    //     // Create an array to hold multiple invoices
+    //     const invoicesArray = [];
+    
+    //     // Construct the serviceAndInvoice object
+    //     const serviceAndInvoice = {
+    //         invoiceTempId: selectInvoiceTemp.value,
+    //         invoiceTempName: selectInvoiceTemp.label,
+    //         invoiceTeamMember: selecteduser.value,
+    //         issueInvoiceSelect: issueInvoice,
+    //         specificDate: startDate,
+    //         specificTime: selectedTime,
+    //         descriptionData: description,
+    //         lineItems: lineItems,
+    //         summary: {
+    //             subtotal: subtotal,
+    //             taxRate: taxRate,
+    //             taxTotal: taxTotal,
+    //             total: totalAmount,
+    //         },
+    //         noteToClient: clientNote,
+    //     };
+    
+    //     // Push the serviceAndInvoice object into the invoicesArray
+    //     invoicesArray.push(serviceAndInvoice);
+    
+    //     console.log('Invoices Array:', invoicesArray);
+    
+    //     // If there's a function to handle the invoices array, pass the array to it
+    //     if (typeof serviceandinvoiceSettings === 'function') {
+    //         serviceandinvoiceSettings(invoicesArray); // Send the array to the callback
+    //     }
+    // };
     
     const handleSaveInvoiceonUpdate = () => {
         const serviceAndInvoice = {
