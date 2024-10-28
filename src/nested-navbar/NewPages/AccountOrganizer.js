@@ -1,5 +1,5 @@
 import {
-    Box, Typography, Divider, Dialog, Tooltip,
+    Box, Typography, Divider, Dialog, Tooltip, FormControlLabel, Switch, InputLabel,
     DialogContent, Select, LinearProgress, Autocomplete, TextField, MenuItem, Chip, Container, Button, Checkbox, FormControl
 } from '@mui/material';
 import { useState, useEffect } from 'react';
@@ -9,14 +9,12 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
-
 const AccountOrganizer = () => {
     const ACCOUNT_API = process.env.REACT_APP_ACCOUNTS_URL;
 
     const { data } = useParams();
 
     const [organizerTemplate, setOrganizerTemplate] = useState([]);
-    const [organizerTemp, setOrganizerTemp] = useState(null);
     const [selectedOrganizerTemplate, setSelectedOrganizerTemplate] = useState('');
     const [selectedAccount, setSelectedAccount] = useState([]);
     const [showOrganizerForm, setShowOrganizerForm] = useState(false);
@@ -64,7 +62,7 @@ const AccountOrganizer = () => {
     };
     // const [sections, setSections] = useState([]);
     const [sections, setSections] = useState([]);
-const[organizerName, setOrganizerName] = useState('');
+    const [organizerName, setOrganizerName] = useState('');
 
     const fetchOrganizerTemplateDataByTempId = async (selectedOrganizerTempid) => {
         try {
@@ -124,43 +122,43 @@ const[organizerName, setOrganizerName] = useState('');
     const [selectedValue, setSelectedValue] = useState(null);
     const shouldShowSection = (section) => {
         if (!section.sectionsettings?.conditional) return true;
-    
+
         const condition = section.sectionsettings?.conditions?.[0];
         if (condition && condition.question && condition.answer) {
             const radioAnswer = radioValues[condition.question];
             const checkboxAnswer = checkboxValues[condition.question];
             const dropdownAnswer = selectedDropdownValue;
-                // For radio buttons
+            // For radio buttons
             if (radioAnswer !== undefined && condition.answer === radioAnswer) {
                 return true;
             }
-                // For checkboxes: check if the condition answer is in the selected checkbox values
+            // For checkboxes: check if the condition answer is in the selected checkbox values
             if (checkboxAnswer && checkboxAnswer[condition.answer]) {
                 return true;
             }
-                // For dropdowns: check if the condition answer matches the selected dropdown value
+            // For dropdowns: check if the condition answer matches the selected dropdown value
             if (dropdownAnswer !== undefined && condition.answer === dropdownAnswer) {
                 return true;
             }
-                return false;
+            return false;
         }
-            return true;
+        return true;
     };
-    
+
 
     const getVisibleSections = () => sections.filter(shouldShowSection);
     const visibleSections = getVisibleSections();
 
     const handleInputChange = (event, elementText) => {
-      const { value } = event.target;
-      setInputValues((prevValues) => ({
-        ...prevValues,
-        [elementText]: value,
-      }));
-      setAnsweredElements((prevAnswered) => ({
-        ...prevAnswered,
-        [elementText]: true,
-      }));
+        const { value } = event.target;
+        setInputValues((prevValues) => ({
+            ...prevValues,
+            [elementText]: value,
+        }));
+        setAnsweredElements((prevAnswered) => ({
+            ...prevAnswered,
+            [elementText]: true,
+        }));
     };
 
     const totalSteps = visibleSections.length;
@@ -220,57 +218,60 @@ const[organizerName, setOrganizerName] = useState('');
         return true;
     };
 
-  
+
     const handleRadioChange = (value, elementText) => {
         setRadioValues((prevValues) => ({
-          ...prevValues,
-          [elementText]: value,
+            ...prevValues,
+            [elementText]: value,
         }));
         setAnsweredElements((prevAnswered) => ({
-          ...prevAnswered,
-          [elementText]: true,
+            ...prevAnswered,
+            [elementText]: true,
         }));
-      };
-    
-      const handleCheckboxChange = (value, elementText) => {
-        setCheckboxValues((prevValues) => ({
-          ...prevValues,
-          [elementText]: {
-            ...prevValues[elementText],
-            [value]: !prevValues[elementText]?.[value],
-          },
-        }));
-        setAnsweredElements((prevAnswered) => ({
-          ...prevAnswered,
-          [elementText]: true,
-        }));
-      };
+    };
 
-      const handleChange = (event, elementText) => {
+    const handleCheckboxChange = (value, elementText) => {
+        setCheckboxValues((prevValues) => ({
+            ...prevValues,
+            [elementText]: {
+                ...prevValues[elementText],
+                [value]: !prevValues[elementText]?.[value],
+            },
+        }));
+        setAnsweredElements((prevAnswered) => ({
+            ...prevAnswered,
+            [elementText]: true,
+        }));
+    };
+
+    const handleChange = (event, elementText) => {
         setSelectedValue(event.target.value);
         setAnsweredElements((prevAnswered) => ({
-          ...prevAnswered,
-          [elementText]: true,
+            ...prevAnswered,
+            [elementText]: true,
         }));
-      };
-    
-    
+    };
 
+    const handleDropdownValueChange = (event, elementText) => {
+        setSelectedDropdownValue(event.target.value);
+        setAnsweredElements((prevAnswered) => ({
+            ...prevAnswered,
+            [elementText]: true,
+        }));
+    };
+    const stripHtmlTags = (html) => {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        return tempDiv.innerText || tempDiv.textContent || '';
+    };
 
+    const [daysuntilNextReminder, setDaysuntilNextReminder] = useState('3');
+    const [noOfReminder, setNoOfReminder] = useState(1);
+    const [reminder, setReminder] = useState(false);
 
-  const handleDropdownValueChange = (event, elementText) => {
-    setSelectedDropdownValue(event.target.value);
-    setAnsweredElements((prevAnswered) => ({
-      ...prevAnswered,
-      [elementText]: true,
-    }));
-  };
-  const stripHtmlTags = (html) => {
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
-    return tempDiv.innerText || tempDiv.textContent || '';
-  };
-
+    const handleAbsolutesDates = (checked) => {
+        setReminder(checked);
+    };
 
     const createOrganizerOfAccount = () => {
         const myHeaders = new Headers();
@@ -278,7 +279,9 @@ const[organizerName, setOrganizerName] = useState('');
         const raw = JSON.stringify({
             accountid: data,
             organizertemplateid: selectedOrganizerTemplate,
-            // reminders: reminder,
+            reminders: reminder,
+            noofreminders: noOfReminder,
+            daysuntilnextreminder: daysuntilNextReminder,
             jobid: ["661e495d11a097f731ccd6e8"],
             sections: selectedOrganizerTempData?.sections?.map(section => ({
                 name: section?.text || '',
@@ -308,7 +311,7 @@ const[organizerName, setOrganizerName] = useState('');
         };
 
         console.log(raw);
-        const url = 'http://127.0.0.1:7600/organizer-account-wise';
+        const url = 'http://127.0.0.1:7600/workflow/orgaccwise/organizeraccountwise/org';
 
         fetch(url, requestOptions)
             .then((response) => response.json())
@@ -411,17 +414,66 @@ const[organizerName, setOrganizerName] = useState('');
             </Box>
 
             <Box mt={2}>
-    <TextField
-      label="Enter Text"
-      variant="outlined"
-      fullWidth
-      value={organizerName || ''} // Replace 'someField' with the field you want to display/edit
-     
-    />
-  </Box>
+                <TextField
+                    label="Enter Text"
+                    variant="outlined"
+                    fullWidth
+                    value={organizerName || ''} // Replace 'someField' with the field you want to display/edit
+                />
+            </Box>
 
-            <Box>
+            <Box mt={2}>
                 <Button variant="contained" onClick={handlePreview}>Preview Mode</Button>
+            </Box>
+            <Box mt={2} display={'flex'} alignItems={'center'} >
+                <Box>
+
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={reminder}
+                                onChange={(event) => handleAbsolutesDates(event.target.checked)}
+                                // checked={reminders}
+                                // onChange={(event)=>handleDateSwitchChange(event.target.checked)}
+                                color="primary"
+                            />
+                        }
+
+                    />
+                </Box>
+                <Typography variant='h6'>Reminders</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mt: 2 }}>
+                {reminder && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mt: 2 }}>
+                        <Box>
+                            <InputLabel sx={{ color: 'black' }}>Days until next reminder</InputLabel>
+                            <TextField
+                                // margin="normal"
+                                fullWidth
+                                name="Daysuntilnextreminder"
+                                value={daysuntilNextReminder}
+                                onChange={(e) => setDaysuntilNextReminder(e.target.value)}
+                                placeholder="Days until next reminder"
+                                size="small"
+                                sx={{ mt: 2 }}
+                            />
+                        </Box>
+
+                        <Box>
+                            <InputLabel sx={{ color: 'black' }}>No Of reminders</InputLabel>
+                            <TextField
+                                fullWidth
+                                name="No Of reminders"
+                                value={noOfReminder}
+                                onChange={(e) => setNoOfReminder(e.target.value)}
+                                placeholder="NoOfreminders"
+                                size="small"
+                                sx={{ mt: 2 }}
+                            />
+                        </Box>
+                    </Box>
+                )};
             </Box>
 
             <Box display={'flex'} gap={2} alignItems={'center'} mt={2}>
@@ -434,7 +486,6 @@ const[organizerName, setOrganizerName] = useState('');
                 </Box>
 
             </Box>
-
 
             <Dialog open={previewDialogOpen} onClose={handleClosePreview} fullScreen >
 

@@ -57,8 +57,18 @@ const ContactUpdateForm = ({ onContactUpdated, selectedContact, handleClose, isS
             setState(selectedContact.state || '');
             setPostalCode(selectedContact.postalCode || '');
             setContactId(selectedContact._id || null); // Set contact ID
-            const flatPhoneNumbers = selectedContact.phoneNumbers?.[0] || [];
-            setPhoneNumbers(flatPhoneNumbers.map(phone => ({ id: Date.now(), phone, isPrimary: false })));
+            // const flatPhoneNumbers = selectedContact.phoneNumbers?.[0] || [];
+            // setPhoneNumbers(flatPhoneNumbers.map(phone => ({ id: Date.now(), phone, isPrimary: false })));
+            // Handle nested phoneNumbers
+
+            // Flatten phoneNumbers array
+            const flatPhoneNumbers = selectedContact.phoneNumbers?.flat() || [];
+            setPhoneNumbers(flatPhoneNumbers.map(phone => ({
+                id: Date.now() + Math.random(), // Improved unique ID generation
+                phone,
+                isPrimary: false // Set based on your logic
+            })));
+
             const flatTags = selectedContact.tags?.[0] || [];
             setTagsNew(flatTags.map(tag => ({
                 value: tag._id,
@@ -101,13 +111,13 @@ const ContactUpdateForm = ({ onContactUpdated, selectedContact, handleClose, isS
     const handleCountryChange = (event) => {
         const selectedCode = event.target.value;
         const selectedCountryObj = countries.find(country => country.code === selectedCode);
-      
+
         // Set the selected country as an object with name and code
         setSelectedCountry({
-          name: selectedCountryObj.name,
-          code: selectedCode
+            name: selectedCountryObj.name,
+            code: selectedCode
         });
-      };
+    };
 
     const handlePhoneNumberChange = (id, phone) => {
         setPhoneNumbers((prevPhoneNumbers) =>
@@ -564,7 +574,7 @@ const ContactUpdateForm = ({ onContactUpdated, selectedContact, handleClose, isS
                 <InputLabel sx={{ color: 'black' }}>Country</InputLabel>
                 <Select
                     size='small'
-                      value={selectedCountry.code}
+                    value={selectedCountry.code}
                     onChange={handleCountryChange}
                     sx={{
                         width: '100%',

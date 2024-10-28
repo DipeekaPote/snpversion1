@@ -11,11 +11,14 @@ import { CiDiscount1 } from 'react-icons/ci';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import { RiCloseLine } from 'react-icons/ri';
 import './invoices.css'
-import {  toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
 import { CiMenuKebab } from "react-icons/ci";
 import CreatableSelect from 'react-select/creatable';
+import { useNavigate, useParams, useRouteLoaderData } from "react-router-dom";
+
 const Invoices = ({ charLimit = 4000 }) => {
+
     const ACCOUNT_API = process.env.REACT_APP_ACCOUNTS_URL;
     const SERVICE_API = process.env.REACT_APP_SERVICES_URL
     const [open, setOpen] = useState(false);
@@ -26,6 +29,9 @@ const Invoices = ({ charLimit = 4000 }) => {
     const [scheduledInvoice, setScheduledInvoice] = useState(false);
     const [charCount, setCharCount] = useState(0);
     const [invoicenumber, setinvoicenumber] = useState();
+
+    const navigate = useNavigate();
+
     const handlePayInvoiceChange = (event) => {
         setIsPayInvoice(event.target.checked);
     };
@@ -73,15 +79,10 @@ const Invoices = ({ charLimit = 4000 }) => {
         setShowDropdown(!showDropdown);
     };
 
-
-
-
-
     useEffect(() => {
         // Simulate filtered shortcuts based on some logic (e.g., search)
         setFilteredShortcuts(shortcuts.filter((shortcut) => shortcut.title.toLowerCase().includes('')));
     }, [shortcuts]);
-
 
     useEffect(() => {
         // Set shortcuts based on selected option
@@ -171,28 +172,25 @@ const Invoices = ({ charLimit = 4000 }) => {
     const [rows, setRows] = useState([]);
     const [servicedata, setServiceData] = useState([]);
 
-
-
     useEffect(() => {
-
-
         fetchServiceData();
-      }, []);
-      const fetchServiceData = async () => {
+    }, []);
+    
+    const fetchServiceData = async () => {
         try {
-          const url = `${SERVICE_API}/workflow/services/servicetemplate`;
-          const response = await fetch(url);
-          const data = await response.json();
-          console.log(data.serviceTemplate)
-          setServiceData(data.serviceTemplate);
+            const url = `${SERVICE_API}/workflow/services/servicetemplate`;
+            const response = await fetch(url);
+            const data = await response.json();
+            console.log(data.serviceTemplate)
+            setServiceData(data.serviceTemplate);
         } catch (error) {
-          console.error("Error fetching data:", error);
+            console.error("Error fetching data:", error);
         }
-      };
-      const serviceoptions = servicedata.map((service) => ({
+    };
+    const serviceoptions = servicedata.map((service) => ({
         value: service._id,
         label: service.serviceName,
-      }));
+    }));
 
     const handleServiceChange = (index, selectedOptions) => {
         const newRows = [...rows];
@@ -228,8 +226,6 @@ const Invoices = ({ charLimit = 4000 }) => {
         setRows(newRows);
     };
 
-
-
     const addRow = (isDiscountRow = false) => {
         const newRow = isDiscountRow
             ? { productName: '', description: '', rate: '$-10.00', qty: '1', amount: '$-10.00', tax: false, isDiscount: true }
@@ -242,7 +238,7 @@ const Invoices = ({ charLimit = 4000 }) => {
         setRows(newRows);
     };
 
-   
+
     const [paymentMode, setPaymentMode] = useState('');
     const paymentsOptions = [
         { value: 'Bank Debits', label: 'Bank Debits' },
@@ -396,211 +392,215 @@ const Invoices = ({ charLimit = 4000 }) => {
         setStartDate(date);
     };
     const [subtotal, setSubtotal] = useState(0);
-  const [taxRate, setTaxRate] = useState(0);
-  const [taxTotal, setTaxTotal] = useState(0);
-  const [totalAmount, setTotalAmount] = useState(0);
-  const handleSubtotalChange = (event) => {
-    const value = parseFloat(event.target.value) || 0;
-    setSubtotal(value);
-    calculateTotal(value, taxRate);
-  };
-
-  const handleTaxRateChange = (event) => {
-    const value = parseFloat(event.target.value) || 0;
-    setTaxRate(value);
-    calculateTotal(subtotal, value);
-  };
-
-  const calculateTotal = (subtotal, taxRate) => {
-    const tax = subtotal * (taxRate / 100);
-    setTaxTotal(tax);
-    setTotalAmount((subtotal + tax).toFixed(2));
-  };
-  useEffect(() => {
-    const calculateSubtotal = () => {
-      let subtotal = 0;
-
-      rows.forEach(row => {
-
-        subtotal += parseFloat(row.amount.replace('$', '')) || 0;
-
-      });
-      console.log(subtotal)
-      setSubtotal(subtotal);
-      calculateTotal(subtotal, taxRate);
+    const [taxRate, setTaxRate] = useState(0);
+    const [taxTotal, setTaxTotal] = useState(0);
+    const [totalAmount, setTotalAmount] = useState(0);
+    const handleSubtotalChange = (event) => {
+        const value = parseFloat(event.target.value) || 0;
+        setSubtotal(value);
+        calculateTotal(value, taxRate);
     };
-    calculateSubtotal();
-  }, [rows]);
 
-  const INVOICE_NEW = process.env.REACT_APP_INVOICES_URL;
-  const lineItems = rows.map(item => ({
-    productorService: item.productName, // Assuming productName maps to productorService
-    description: item.description,
-    rate: item.rate.replace('$', ''), // Removing '$' sign from rate
-    quantity: item.qty,
-    amount: item.amount.replace('$', ''), // Removing '$' sign from amount
-    tax: item.tax.toString() // Converting boolean to string
-  }));
-  const createinvoice = () => {
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-
-    const raw = JSON.stringify({
-      account: selectedaccount.value,
-      invoicenumber: invoicenumber,
-      invoicedate: startDate,
-      description: description,
-      invoicetemplate: selectInvoiceTemp.value,
-      paymentMethod: paymentMode.value,
-      teammember: selecteduser.value,
-      emailinvoicetoclient: emailInvoice,
-      scheduleinvoicedate: "Wed May 08 2024 00:00:00 GMT+0530 (India Standard Time)",
-      scheduleinvoicetime: "12.00",
-      payInvoicewithcredits: payInvoice,
-      reminders: reminders,
-      scheduleinvoice: scheduledInvoice,
-      daysuntilnextreminder: "",
-      numberOfreminder: "",
-      lineItems: lineItems,
-      summary: {
-        subtotal: subtotal,
-        taxRate: taxRate,
-        taxTotal: taxTotal,
-        total: totalAmount
-      },
-      active: "true"
-    });
-
-    // console.log(raw)
-    // console.log(raw);
-    const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: raw,
-      redirect: "follow"
+    const handleTaxRateChange = (event) => {
+        const value = parseFloat(event.target.value) || 0;
+        setTaxRate(value);
+        calculateTotal(subtotal, value);
     };
-    const url = `${INVOICE_NEW}/workflow/invoices/invoice`;
-    fetch(url, requestOptions)
-      .then((response) => response.json())
-      .then((result) => {
-        console.log(result)
-        if (result && result.message === "Invoice created successfully") {
-          toast.success("Invoice created successfully");
-          handleClose();
-          fetchInvoiceData();
 
-        } else {
-          toast.error(result.message || "Failed to create InvoiceTemplate");
+    const calculateTotal = (subtotal, taxRate) => {
+        const tax = subtotal * (taxRate / 100);
+        setTaxTotal(tax);
+        setTotalAmount((subtotal + tax).toFixed(2));
+    };
+    useEffect(() => {
+        const calculateSubtotal = () => {
+            let subtotal = 0;
+
+            rows.forEach(row => {
+
+                subtotal += parseFloat(row.amount.replace('$', '')) || 0;
+
+            });
+            console.log(subtotal)
+            setSubtotal(subtotal);
+            calculateTotal(subtotal, taxRate);
+        };
+        calculateSubtotal();
+    }, [rows]);
+
+    const INVOICE_NEW = process.env.REACT_APP_INVOICES_URL;
+    const lineItems = rows.map(item => ({
+        productorService: item.productName, // Assuming productName maps to productorService
+        description: item.description,
+        rate: item.rate.replace('$', ''), // Removing '$' sign from rate
+        quantity: item.qty,
+        amount: item.amount.replace('$', ''), // Removing '$' sign from amount
+        tax: item.tax.toString() // Converting boolean to string
+    }));
+    const createinvoice = () => {
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+
+        const raw = JSON.stringify({
+            account: selectedaccount.value,
+            invoicenumber: invoicenumber,
+            invoicedate: startDate,
+            description: description,
+            invoicetemplate: selectInvoiceTemp.value,
+            paymentMethod: paymentMode.value,
+            teammember: selecteduser.value,
+            emailinvoicetoclient: emailInvoice,
+            scheduleinvoicedate: "Wed May 08 2024 00:00:00 GMT+0530 (India Standard Time)",
+            scheduleinvoicetime: "12.00",
+            payInvoicewithcredits: payInvoice,
+            reminders: reminders,
+            scheduleinvoice: scheduledInvoice,
+            daysuntilnextreminder: "",
+            numberOfreminder: "",
+            lineItems: lineItems,
+            summary: {
+                subtotal: subtotal,
+                taxRate: taxRate,
+                taxTotal: taxTotal,
+                total: totalAmount
+            },
+            active: "true"
+        });
+
+        // console.log(raw)
+        // console.log(raw);
+        const requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: raw,
+            redirect: "follow"
+        };
+        const url = `${INVOICE_NEW}/workflow/invoices/invoice`;
+        fetch(url, requestOptions)
+            .then((response) => response.json())
+            .then((result) => {
+                console.log(result)
+                if (result && result.message === "Invoice created successfully") {
+                    toast.success("Invoice created successfully");
+                    handleClose();
+                    fetchInvoiceData();
+
+                } else {
+                    toast.error(result.message || "Failed to create InvoiceTemplate");
+                }
+            })
+            .catch((error) => console.error(error));
+    }
+
+
+    const [billingInvoice, setBillingInvoice] = useState([]);
+    const fetchInvoiceData = async () => {
+        try {
+            const url = `${INVOICE_NEW}/workflow/invoices/invoice`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Failed to fetch email templates');
+            }
+            const data = await response.json();
+
+            setBillingInvoice(data.invoice);
+
+        } catch (error) {
+            console.error('Error fetching email templates:', error);
+
         }
-      })
-      .catch((error) => console.error(error));
-  }
+    };
 
+    const handleEdit = (_id) => {
+        navigate("Updateinvoice/" + _id);
+    };
 
-  const [billingInvoice, setBillingInvoice] = useState([]);
-  const fetchInvoiceData = async () => {
-      try {
-          const url = `${INVOICE_NEW}/workflow/invoices/invoice`;
-          const response = await fetch(url);
-          if (!response.ok) {
-              throw new Error('Failed to fetch email templates');
-          }
-          const data = await response.json();
+    useEffect(() => {
+        fetchInvoiceData();
+    }, []);
 
-          setBillingInvoice(data.invoice);
-
-      } catch (error) {
-          console.error('Error fetching email templates:', error);
-
-      }
-  };
-
-  useEffect(() => {
-    fetchInvoiceData();
-  }, []);
-
-  const [tempIdget, setTempIdGet] = useState("");
+    const [tempIdget, setTempIdGet] = useState("");
     const [openMenuId, setOpenMenuId] = useState(null);
     const toggleMenu = (_id) => {
-      setOpenMenuId(openMenuId === _id ? null : _id);
-      setTempIdGet(_id);
+        setOpenMenuId(openMenuId === _id ? null : _id);
+        setTempIdGet(_id);
     };
 
-  const columns = useMemo(() => [
-    {
-      accessorKey: 'invoicenumber',
-      header: 'Invoice Number',
+    const columns = useMemo(() => [
+        {
+            accessorKey: 'invoicenumber',
+            header: 'Invoice Number',
 
-    },
-    
-    {
-      accessorKey: 'Setting', header: 'Setting',
-      Cell: ({ row }) => (
-        <IconButton onClick={() => toggleMenu(row.original._id)} style={{ color: "#2c59fa" }}>
-          <CiMenuKebab style={{ fontSize: "25px" }} />
-          {openMenuId === row.original._id && (
-            <Box sx={{ position: 'absolute', zIndex: 1, backgroundColor: '#fff', boxShadow: 1, borderRadius: 1, p: 1, left: '30px', m: 2 }}>
-              <Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}  >Edit</Typography>
-              <Typography sx={{ fontSize: '12px', color: 'red', fontWeight: 'bold' }} onClick={() => handleDelete(row.original._id)}
-              >Delete</Typography>
-            </Box>
-          )}
-        </IconButton>
+        },
 
-      ),
+        {
+            accessorKey: 'Setting', header: 'Setting',
+            Cell: ({ row }) => (
+                <IconButton onClick={() => toggleMenu(row.original._id)} style={{ color: "#2c59fa" }}>
+                    <CiMenuKebab style={{ fontSize: "25px" }} />
+                    {openMenuId === row.original._id && (
+                        <Box sx={{ position: 'absolute', zIndex: 1, backgroundColor: '#fff', boxShadow: 1, borderRadius: 1, p: 1, left: '30px', m: 2 }}>
+                            <Typography sx={{ fontSize: '12px', fontWeight: 'bold' }} onClick={() => handleEdit(row.original._id)}>Edit</Typography>
+                            <Typography sx={{ fontSize: '12px', color: 'red', fontWeight: 'bold' }} onClick={() => handleDelete(row.original._id)}
+                            >Delete</Typography>
+                        </Box>
+                    )}
+                </IconButton>
 
-    },
+            ),
 
-  ], [openMenuId]);
+        },
 
-  const table = useMaterialReactTable({
-    columns,
-    data: billingInvoice,
-    enableBottomToolbar: true,
-    enableStickyHeader: true,
-    columnFilterDisplayMode: "custom", // Render own filtering UI
-    enableRowSelection: true, // Enable row selection
-    enablePagination: true,
-    muiTableContainerProps: { sx: { maxHeight: "400px" } },
-    initialState: {
-      columnPinning: { left: ["mrt-row-select", "tagName"], right: ['settings'], },
-    },
-    muiTableBodyCellProps: {
-      sx: (theme) => ({
-        backgroundColor: theme.palette.mode === "dark-theme" ? theme.palette.grey[900] : theme.palette.grey[50],
-      }),
-    },
-  });
+    ], [openMenuId]);
 
-  const handleDelete = (_id) => {
-    const requestOptions = {
-        method: 'DELETE',
-        redirect: 'follow',
+    const table = useMaterialReactTable({
+        columns,
+        data: billingInvoice,
+        enableBottomToolbar: true,
+        enableStickyHeader: true,
+        columnFilterDisplayMode: "custom", // Render own filtering UI
+        enableRowSelection: true, // Enable row selection
+        enablePagination: true,
+        muiTableContainerProps: { sx: { maxHeight: "400px" } },
+        initialState: {
+            columnPinning: { left: ["mrt-row-select", "tagName"], right: ['settings'], },
+        },
+        muiTableBodyCellProps: {
+            sx: (theme) => ({
+                backgroundColor: theme.palette.mode === "dark-theme" ? theme.palette.grey[900] : theme.palette.grey[50],
+            }),
+        },
+    });
+
+    const handleDelete = (_id) => {
+        const requestOptions = {
+            method: 'DELETE',
+            redirect: 'follow',
+        };
+        const url = `${INVOICE_NEW}/workflow/invoices/invoice/`;
+        fetch(url + _id, requestOptions)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Failed to delete item');
+                }
+                return response.json();
+            })
+            .then((result) => {
+                toast.success('Data deleted successfully');
+                fetchInvoiceData();
+
+            })
+            .catch((error) => {
+                console.error(error);
+            });
     };
-    const url = `${INVOICE_NEW}/workflow/invoices/invoice/`;
-    fetch(url + _id, requestOptions)
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error('Failed to delete item');
-            }
-            return response.json();
-        })
-        .then((result) => {
-            toast.success('Data deleted successfully');
-            fetchInvoiceData();
-          
-        })
-        .catch((error) => {
-            console.error(error);
-        });
-};
     return (
         <Box>
             <Button type='button' variant="contained" onClick={handleOpen} >
                 Create Invoice
             </Button>
-<Box sx={{marginTop:3}}>
-            <MaterialReactTable columns={columns} table={table} />
+            <Box sx={{ marginTop: 3 }}>
+                <MaterialReactTable columns={columns} table={table} />
             </Box>
             <Drawer
                 anchor='right'
@@ -611,7 +611,6 @@ const Invoices = ({ charLimit = 4000 }) => {
                     sx: {
                         width: '60%',
                         // padding: 2,
-
                     },
                 }}
             >

@@ -225,13 +225,14 @@ const Info = () => {
     return selectedContacts.join(', '); // Just join the IDs array into a string
   };
 
-  useEffect(() => {
-    setFilteredContacts(
-      contactData.filter(contact =>
-        contact.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    );
-  }, [searchQuery, contactData]); // Adjusted dependency array
+// Effect to filter contacts based on search query
+useEffect(() => {
+  setFilteredContacts(
+    contactData.filter(contact =>
+      contact.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  );
+}, [searchQuery, contactData]);
 
   const handleAddContactDrawer = () => {
     setIsDrawerOpenForAddContact(true);
@@ -383,95 +384,97 @@ const Info = () => {
                 </Button>
               </Box>
 
-              <Drawer
-                anchor="right"
-                open={isDrawerOpenForAddContact}
-                onClose={handleCloseDrawerofAddContact}
-                PaperProps={{
-                  sx: { width: 700 },
-                }}
-              >
-                {/* Header */}
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    p: 2,
-                    borderBottom: '1px solid #e0e0e0',
-                  }}
-                >
-                  <Typography variant="h6" fontWeight="bold">
-                    Link Contacts
-                  </Typography>
-                  <IconButton onClick={handleCloseDrawerofAddContact} sx={{ color: '#1876d3' }}>
-                    <CloseIcon />
-                  </IconButton>
-                </Box>
+          
+<Drawer
+  anchor="right"
+  open={isDrawerOpenForAddContact}
+  onClose={handleCloseDrawerofAddContact}
+  PaperProps={{
+    sx: { width: 700 },
+  }}
+>
+  {/* Header */}
+  <Box
+    sx={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      p: 2,
+      borderBottom: '1px solid #e0e0e0',
+    }}
+  >
+    <Typography variant="h6" fontWeight="bold">
+      Link Contacts
+    </Typography>
+    <IconButton onClick={handleCloseDrawerofAddContact} sx={{ color: '#1876d3' }}>
+      <CloseIcon />
+    </IconButton>
+  </Box>
 
-                {/* Content Section */}
-                <Box
-                  sx={{
-                    p: 2,
-                    flex: '1 1 auto',
-                    overflowY: 'auto',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 2,
-                  }}
-                >
-                  <Autocomplete
-                    multiple // Enable multiple selections
-                    options={filteredContacts}
-                    getOptionLabel={(option) => option.name} // Specify how to display the option
-                    onInputChange={(event, newValue) => {
-                      setSearchQuery(newValue);
-                    }}
-                    onChange={(event, newValue) => {
-                      // Update selected contacts with only IDs
-                      const ids = newValue.map(contact => contact.id); // Extract IDs from selected contacts
-                      setSelectedContacts(ids); // Update selectedContacts with IDs
-                      console.log(getSelectedIds()); // Log the comma-separated IDs
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        variant="outlined"
-                        placeholder="Search contacts..."
-                        onFocus={(e) => e.stopPropagation()} // Prevent dropdown from closing
-                      />
-                    )}
-                    renderOption={(props, option) => (
-                      <li {...props} key={option.id}>
-                        {option.name}
-                      </li>
-                    )}
-                    fullWidth
-                    disableClearable // Prevents clearing the input by clicking the clear button
-                    value={filteredContacts.filter(contact => selectedContacts.includes(contact.id))} // Control the selected value
-                  />
+  {/* Content Section */}
+  <Box
+    sx={{
+      p: 2,
+      flex: '1 1 auto',
+      overflowY: 'auto',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 2,
+    }}
+  >
+   <Autocomplete
+      multiple
+      options={filteredContacts} // Use filtered contacts based on the search
+      getOptionLabel={(option) => option.name} // Specify how to display the option
+      onInputChange={(event, newValue) => {
+        // Handle only the input change without losing focus
+        if (event) {
+          setSearchQuery(newValue); // Update the search query
+        }
+      }}
+      onChange={(event, newValue) => {
+        // Update selected contacts with only IDs
+        const ids = newValue.map(contact => contact.id); // Extract IDs from selected contacts
+        setSelectedContacts(ids); // Update selectedContacts with IDs
+      }}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          variant="outlined"
+          placeholder="Search contacts..."
+          onFocus={(e) => e.stopPropagation()} // Prevent dropdown from closing
+        />
+      )}
+      renderOption={(props, option) => (
+        <li {...props} key={option.id}>
+          {option.name}
+        </li>
+      )}
+      disableCloseOnSelect // Keeps the dropdown open while making multiple selections
+      fullWidth
+      disableClearable // Prevents clearing the input by clicking the clear button
+      value={filteredContacts.filter(contact => selectedContacts.includes(contact.id))} // Control the selected value
+    />
+  </Box>
 
-                </Box>
-
-                {/* Footer */}
-                <Box
-                  sx={{
-                    borderTop: '1px solid #e0e0e0',
-                    p: 2,
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    gap: 2,
-                  }}
-                >
-                  <Button variant="contained" color="primary" onClick={handleLinkAccounts}>
-                    Link
-                  </Button>
-                  <Button variant="outlined" color="secondary" onClick={handleCloseDrawerofAddContact}>
-                    Cancel
-                  </Button>
-                </Box>
-              </Drawer>
-
+  {/* Footer */}
+  <Box
+    sx={{
+      borderTop: '1px solid #e0e0e0',
+      p: 2,
+      display: 'flex',
+      justifyContent: 'flex-end',
+      gap: 2,
+    }}
+  >
+    <Button variant="contained" color="primary" onClick={handleLinkAccounts}>
+      Link
+    </Button>
+    <Button variant="outlined" color="secondary" onClick={handleCloseDrawerofAddContact}>
+      Cancel
+    </Button>
+  </Box>
+</Drawer>
 
               <Box sx={{ mt: 1 }}>
                 <Divider />

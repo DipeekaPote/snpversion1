@@ -54,7 +54,7 @@ import Inbox from "./nested-navbar/email-nav/Inbox";
 import Sent from "./nested-navbar/email-nav/Sent";
 import Payments from "./nested-navbar/invoices-nav/Payments";
 import Invoice from "./nested-navbar/invoices-nav/Invoice";
-
+import InvoiceUpdate from "./Billing/invoiceUpdate.js"
 import Documents from "./nested-navbar/documents-nav/Documents";
 import Approvals from "./nested-navbar/documents-nav/Approvals";
 import Signatures from "./nested-navbar/documents-nav/Signatures";
@@ -66,7 +66,7 @@ import ChatTempUpdate from './Templates/ChatsTemp/ChatTempUpdate.js';
 import ServicesUpdate from './Pages/ServiceUpdate.js';
 import PreviewOrganizer from './Templates/OrganizersTemp/PreviewOranizer.js';
 import AccountOrganizer from './nested-navbar/NewPages/AccountOrganizer.js';
-
+// import Updateinvoice from './nested-navbar/invoices-nav/UpdateInvoice.js'
 
 
 const App = () => {
@@ -83,7 +83,9 @@ const App = () => {
           <Route path='clients/contacts' element={<Contact />} />
 
           <Route path='addJobs' element={<CreateJob />} />
-          <Route path='billing/Invoices' element={<Invoices />} />
+          <Route path='billing/Invoices' element={<Invoices />} 
+          />
+          <Route path='billing/Invoices/Updateinvoice/:_id' element={<InvoiceUpdate/>} />
           <Route path='workflow/tasks' element={<WorkflowTask />} />
           <Route path='workflow/jobs' element={<Jobs />} />
           <Route path='workflow/pipelines' element={<Pipeline />} />
@@ -138,6 +140,7 @@ const App = () => {
             <Route path="invoices/:data" element={<AccountInvoice />}>
               <Route path="invoice" element={<Invoice />} />
               <Route path="payments" element={<Payments />} />
+              {/* <Route path="" element={<Updateinvoice/>}/> */}
             </Route>
             <Route path="email/:data" element={<Email />}>
               <Route path="inbox" element={<Inbox />} />
