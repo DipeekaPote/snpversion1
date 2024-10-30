@@ -101,79 +101,13 @@ const Invoice = () => {
     setShowInvoiceUpdateForm(false)
   };
 
+  const [invoiceId, SetInvoiceId] = useState()
   const handleEdit = (_id) => {
     setShowInvoiceUpdateForm(true);
-    fetchinvoicebyid(_id)
+    SetInvoiceId(_id)
     // navigate("/" + _id);
   };
-
-  // const invoiceData = {};
-  const fetchinvoicebyid = (id) => {
-    const requestOptions = {
-      method: "GET",
-      redirect: "follow"
-    };
-
-    const url = `http://127.0.0.1:7650/workflow/invoices/invoice/invoicelist/invoicelistbyid/${id}`;
-    console.log(url);
-
-    fetch(url, requestOptions)
-      .then((response) => response.json())
-      .then((result) => {
-        console.log(result);
-
-        // Check if result and invoice exist before setting state
-        if (result && result.invoice) {
-
-          // Create invoiceData object
-          const invoiceData = {
-            invoicenumber: result.invoice.invoicenumber,
-            // setInvoicenumber, // Assuming setInvoicenumber is already defined in the component state
-
-            startDate:  result.invoice.invoicedate,
-            // setStartDate, // Assuming setStartDate is already defined
-
-            selectedaccount:  result.invoice.account,
-            // setSelectedaccount, // Assuming setSelectedaccount is already defined
-
-            selectedInvoiceTemp:  result.invoice.invoicetemplate,
-            // setSelectedInvoiceTemp, // Assuming setSelectedInvoiceTemp is already defined
-
-            paymentMode:  result.invoice.paymentMethod,
-            // setPaymentMode, // Assuming setPaymentMode is already defined
-
-            selectedUser:  result.invoice.teammember,
-            // setSelectedUser, // Assuming setSelectedUser is already defined
-
-            description: result.invoice.description,
-            // setDescription, // Assuming setDescription is already defined
-
-            emailToClient: result.invoice.emailinvoicetoclient,
-            // setEmailToClient, // Assuming setEmailToClient is already defined
-
-            scheduledInvoice: result.invoice.scheduleinvoicetime,
-            // setScheduledInvoice, // Assuming setScheduledInvoice is already defined
-
-            isPayInvoice: result.invoice.payInvoicewithcredits,
-            // setIsPayInvoice, // Assuming setIsPayInvoice is already defined
-
-            isEmailInvoice: result.invoice.emailinvoicetoclient,
-            // setIsEmailInvoice, // Assuming setIsEmailInvoice is already defined
-
-            reminders: result.invoice.reminders,
-            // setReminders, // Assuming setReminders is already defined
-
-            rows:  result.invoice.lineItems,
-            // setRows // Assuming setRows is already defined
-          };
-
-          // Now, use invoiceData as needed
-          console.log(invoiceData);
-
-        }
-      })
-      .catch((error) => console.error(error));
-  };
+console.log(invoiceId)
 
   const handleDuplicate = async (_id) => {
     // Find the template by its ID
@@ -241,7 +175,7 @@ const Invoice = () => {
                 <TableCell>
                   <Typography
                     sx={{ color: '#2c59fa', cursor: 'pointer', fontWeight: 'bold' }}
-                  // onClick={() => handleEdit(row._id)}
+                    onClick={() => handleEdit(row._id)}
                   >
                     {row.invoicenumber}
                   </Typography>
@@ -323,7 +257,7 @@ const Invoice = () => {
           },
         }}
       >
-        <UpdateInvoice onClose={handleInvoiceUpdateClose} invoiceData={invoiceData}  />
+        <UpdateInvoice onClose={handleInvoiceUpdateClose} invoiceData={invoiceId}  />
       </Drawer>
 
     </Box>

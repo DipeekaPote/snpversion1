@@ -44,11 +44,32 @@ const AccountOrganizer = () => {
             const url = `${ACCOUNT_API}/accounts/account/accountdetailslist/`;
             const response = await fetch(url);
             const result = await response.json();
+
+
             if (Array.isArray(result.accountlist)) {
                 setAccountData(result.accountlist);
+                console.log(result.accountlist);
+
+                // Assuming `data` contains the selected account ID(s) as a string or array of IDs
+
+                const selectedAccounts = result.accountlist
+                    .filter((account) => Array.isArray(data) ? data.includes(account.id) : account.id === data)
+                    .map((selectedAccount) => ({
+                        label: selectedAccount.Name,
+                        value: selectedAccount.id,
+                    }));
+
+                if (selectedAccounts.length > 0) {
+                    setSelectedAccount(selectedAccounts);
+                } else {
+                    setSelectedAccount([]); // Clear if no matching accounts found
+                }
+
+
             } else {
                 console.error("Account list is not an array", result.accountlist);
             }
+
         } catch (error) {
             console.log("Error:", error);
         }
@@ -341,11 +362,7 @@ const AccountOrganizer = () => {
 
     return (
         <Container>
-            {/* <Box p={2}>
-                <Typography><strong>Organizer</strong></Typography>
-            </Box> */}
             <Divider />
-
             <Box mt={3} borderBottom={"2px solid #e2e8f0"} p={2}>
                 <Typography fontSize={20}><strong>Create organizer</strong></Typography>
             </Box>
@@ -356,9 +373,9 @@ const AccountOrganizer = () => {
                     multiple
                     options={AccountsOptions}
                     getOptionLabel={(option) => option.label}
-                    value={selectedAccount.map((id) => AccountsOptions.find((opt) => opt.value === id)).filter(Boolean)} // Convert selected IDs to option objects
+                    value={selectedAccount} // Use selectedAccount directly since it's already in the correct format
                     onChange={(event, newValue) => {
-                        setSelectedAccount(newValue.map((option) => option.value)); // Update state with new IDs
+                        setSelectedAccount(newValue); // Set the new objects directly
                     }}
                     renderTags={(selected, getTagProps) =>
                         selected.map((option, index) => (
@@ -380,7 +397,7 @@ const AccountOrganizer = () => {
                     renderOption={(props, option, { selected }) => (
                         <li {...props}>
                             <Checkbox
-                                checked={selectedAccount.indexOf(option.value) > -1}
+                                checked={selectedAccount.some((acc) => acc.value === option.value)}
                                 style={{ marginRight: 8 }}
                             />
                             {option.label}
@@ -388,7 +405,6 @@ const AccountOrganizer = () => {
                     )}
                 />
             </Box>
-
 
             <Box mt={3}>
                 <FormControl fullWidth sx={{ marginBottom: '10px' }}>
@@ -488,10 +504,7 @@ const AccountOrganizer = () => {
             </Box>
 
             <Dialog open={previewDialogOpen} onClose={handleClosePreview} fullScreen >
-
                 <DialogContent >
-
-
                     <Box>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <Box>
@@ -512,11 +525,6 @@ const AccountOrganizer = () => {
                                         onChange={handleDropdownChange}
                                         size='small'
                                     >
-                                        {/* {sections.map((section, index) => (
-                <MenuItem key={index} value={index}>
-                    {section.text} ({answeredCount}/{totalElements})
-                </MenuItem>
-            ))} */}
                                         {visibleSections.map((section, index) => (
                                             <MenuItem key={index} value={index}>
                                                 {section.text} ({answeredCount}/{totalElements})
@@ -529,10 +537,7 @@ const AccountOrganizer = () => {
                                     <LinearProgress variant="determinate" value={(activeStep + 1) / totalSteps * 100} />
                                 </Box>
 
-                                {/* {sections
-        .filter(shouldShowSection) // Filter sections based on conditions
-        .map((section, sectionIndex) => (
-            sectionIndex === activeStep && ( */}
+                               
                                 <Box sx={{ pl: 20, pr: 20 }}>
                                     {visibleSections.map((section, sectionIndex) => (
                                         sectionIndex === activeStep && (

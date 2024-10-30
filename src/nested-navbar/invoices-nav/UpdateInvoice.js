@@ -18,7 +18,7 @@ import HelpIcon from '@mui/icons-material/Help';
 import { useNavigate, useParams } from "react-router-dom";
 import dayjs from 'dayjs';
 
-const InvoicesUpdate = ({ charLimit = 4000 , onClose }) => {
+const InvoicesUpdate = ({ charLimit = 4000 , onClose, invoiceData }) => {
 
     const ACCOUNT_API = process.env.REACT_APP_ACCOUNTS_URL;
     const SERVICE_API = process.env.REACT_APP_SERVICES_URL
@@ -336,12 +336,12 @@ const InvoicesUpdate = ({ charLimit = 4000 , onClose }) => {
         fetchinvoicetempbyid(selectedOptions.value);
     };
 
-    const fetchinvoicetempbyid = async (id) => {
+    const fetchinvoicetempbyid = async (invoiceData) => {
         const requestOptions = {
             method: "GET",
             redirect: "follow"
         };
-        const url = `${INVOICE_API}/workflow/invoicetemp/invoicetemplate/${id}`;
+        const url = `${INVOICE_API}/workflow/invoicetemp/invoicetemplate/${invoiceData}`;
         fetch(url, requestOptions)
             .then((response) => response.json())
             .then((result) => {
@@ -457,7 +457,7 @@ const InvoicesUpdate = ({ charLimit = 4000 , onClose }) => {
             redirect: "follow"
         };
 
-        const url = `http://127.0.0.1:7650/workflow/invoices/invoice/${_id}`;
+        const url = `http://127.0.0.1:7650/workflow/invoices/invoice/${invoiceData}`;
         fetch(url, requestOptions)
             .then((response) => response.json())
             .then((result) => {
@@ -519,7 +519,8 @@ const InvoicesUpdate = ({ charLimit = 4000 , onClose }) => {
     };
 
     useEffect(() => {
-        fetchinvoicebyid(_id);
+        console.log(invoiceData)
+        fetchinvoicebyid(invoiceData);
     }, []);
 
     const [invoiceidetails, setinvoicedetails] = useState();
@@ -649,7 +650,7 @@ const InvoicesUpdate = ({ charLimit = 4000 , onClose }) => {
                     setEmailToClient(result.invoice.emailinvoicetoclient);
 
                     // Set scheduled invoice time
-                    setScheduledInvoice(result.invoice.scheduleinvoicetime);
+                    setScheduledInvoice(result.invoice.scheduleinvoice);
 
                     // Set pay invoice with credits
                     setIsPayInvoice(result.invoice.payInvoicewithcredits);

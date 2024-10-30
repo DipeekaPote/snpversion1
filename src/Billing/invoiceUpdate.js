@@ -675,7 +675,7 @@ const Invoices = ({ charLimit = 4000 }) => {
                     setEmailToClient(result.invoice.emailinvoicetoclient);
 
                     // Set scheduled invoice time
-                    setScheduledInvoice(result.invoice.scheduleinvoicetime);
+                    setScheduledInvoice(result.invoice.scheduleinvoice);
 
                     // Set pay invoice with credits
                     setIsPayInvoice(result.invoice.payInvoicewithcredits);

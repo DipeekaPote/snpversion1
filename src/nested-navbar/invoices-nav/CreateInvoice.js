@@ -15,14 +15,17 @@ import { toast } from 'react-toastify';
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
 import { CiMenuKebab } from "react-icons/ci";
 import CreatableSelect from 'react-select/creatable';
+import { useParams } from 'react-router-dom';
 
 const CreateInvoice = ({ charLimit = 4000, onClose }) => {
     const ACCOUNT_API = process.env.REACT_APP_ACCOUNTS_URL;
     const SERVICE_API = process.env.REACT_APP_SERVICES_URL
     const INVOICE_API = process.env.REACT_APP_INVOICE_TEMP_URL
 
+    const { data } = useParams();
+
     const [invoiceTemplates, setInvoiceTemplates] = useState([]);
-    const [selectedaccount, setSelectedaccount] = useState();
+    const [selectedaccount, setSelectedaccount] = useState(null);
     const [accountdata, setaccountdata] = useState([]);
     const [description, setDescription] = useState('');
     const [payInvoice, setIsPayInvoice] = useState(false);
@@ -42,11 +45,27 @@ const CreateInvoice = ({ charLimit = 4000, onClose }) => {
         fetchAccountData();
     }, []);
 
+    console.log(selectedaccount)
     const fetchAccountData = async () => {
         try {
             const response = await fetch(`${ACCOUNT_API}/accounts/accountdetails`);
-            const data = await response.json();
-            setaccountdata(data.accounts);
+            const result = await response.json();
+            setaccountdata(result.accounts);
+            console.log(result.accounts)
+            console.log(data)
+
+            const selectedAccount = result.accounts.find((account) => account._id === data); // Assume data contains the account ID
+            console.log(selectedAccount);
+
+            if (selectedAccount) {
+                const account = {
+                    label: selectedAccount.accountName,
+                    value: selectedAccount._id,
+                };
+                console.log(account);
+                setSelectedaccount(account);
+            }
+
         } catch (error) {
             console.error("Error fetching data:", error);
         }
@@ -58,6 +77,7 @@ const CreateInvoice = ({ charLimit = 4000, onClose }) => {
     }));
 
     const handleAccountChange = (event, newValue) => {
+        console.log(newValue)
         setSelectedaccount(newValue);
     }
 
@@ -186,7 +206,7 @@ const CreateInvoice = ({ charLimit = 4000, onClose }) => {
 
         setRows(newRows);
     };
-    
+
     const addRow = (isDiscountRow = false) => {
         const newRow = isDiscountRow
             ? { productName: '', description: '', rate: '$-10.00', qty: '1', amount: '$-10.00', tax: false, isDiscount: true }
@@ -400,7 +420,7 @@ const CreateInvoice = ({ charLimit = 4000, onClose }) => {
         calculateSubtotal();
     }, [rows]);
 
-  
+
     const INVOICE_NEW = process.env.REACT_APP_INVOICES_URL;
     const lineItems = rows.map(item => ({
         productorService: item.productName, // Assuming productName maps to productorService
@@ -489,39 +509,45 @@ const CreateInvoice = ({ charLimit = 4000, onClose }) => {
 
     return (
         <Box>
-             <Typography variant="h6">Create Invoice</Typography>
+            <Typography variant="h6">Create Invoice</Typography>
 
             <Box mt={3} p={2} sx={{ height: '80vh', overflowY: 'auto' }} className='create-invoice'>
                 <Box >
                     <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
                         <Grid xs={6}>
                             <Box>
-                                <InputLabel sx={{ color: 'black' }}>Account name,ID or email</InputLabel>
-                                <Autocomplete
-                                    options={accountoptions}
-                                    value={selectedaccount}
-                                    onChange={handleAccountChange}
-                                    renderOption={(props, option) => (
-                                        <Box
-                                            component="li"
-                                            {...props}
-                                            sx={{ cursor: 'pointer', margin: '5px 10px' }} // Add cursor pointer style
-                                        >
-                                            {option.label}
-                                        </Box>
-                                    )}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            placeholder="Select Account"
-                                            variant="outlined"
-                                            size="small"
-                                            sx={{ backgroundColor: '#fff' }}
-                                        />
-                                    )}
-                                    sx={{ width: '100%', marginTop: '8px' }}
-                                />
-                            </Box>
+                                <InputLabel sx={{ color: 'black' }}>Account name, ID or email</InputLabel>
+                              
+                                    <Autocomplete
+                                        options={accountoptions} // Ensure this is an array of objects with { label, value }
+                                        value={selectedaccount} // Display the selected account
+                                        onChange={handleAccountChange} // Update the selected account on change
+                                        getOptionLabel={(option) => option.label || ""} // Safely access label
+                                        isOptionEqualToValue={(option, value) => option.value === value.value} // Compare values correctly
+                                        renderOption={(props, option) => (
+                                            <Box
+                                                component="li"
+                                                {...props}
+                                                sx={{ cursor: 'pointer', margin: '5px 10px' }} // Add cursor pointer style
+                                            >
+                                                {option.label}
+                                            </Box>
+                                        )}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                placeholder="Select Account"
+                                                variant="outlined"
+                                                size="small"
+                                                sx={{ backgroundColor: '#fff' }}
+                                            />
+                                        )}
+                                        sx={{ width: '100%', marginTop: '8px' }}
+                                    />
+                                </Box>
+
+
+
                         </Grid>
                         <Grid xs={6}>
                             <Box>
@@ -558,7 +584,7 @@ const CreateInvoice = ({ charLimit = 4000, onClose }) => {
                                     sx={{ mt: 1 }}
                                 />
                             </Box>
-                                                    </Grid>
+                        </Grid>
                         <Grid xs={6}>
                             <Box>
                                 <InputLabel sx={{ color: 'black' }}>Choose payment method</InputLabel>
